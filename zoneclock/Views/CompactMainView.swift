@@ -115,7 +115,7 @@ struct CompactMainView: View {
                 if stateManager.currentState == .ready {
                     Button(action: startFocus) {
                         Image(systemName: "play.fill")
-                            .font(.title3)
+                            .font(.zenBody)
                             .foregroundColor(.zenBackground)
                             .frame(width: 50, height: 50)
                             .background(Color.zenAccent)
@@ -127,7 +127,7 @@ struct CompactMainView: View {
                         if cycle.status == .active {
                             Button(action: pauseFocus) {
                                 Image(systemName: "pause.fill")
-                                    .font(.title3)
+                                    .font(.zenBody)
                                     .foregroundColor(.zenBackground)
                                     .frame(width: 44, height: 44)
                                     .background(Color.zenAccent)
@@ -137,7 +137,7 @@ struct CompactMainView: View {
                         } else {
                             Button(action: resumeFocus) {
                                 Image(systemName: "play.fill")
-                                    .font(.title3)
+                                    .font(.zenBody)
                                     .foregroundColor(.zenBackground)
                                     .frame(width: 44, height: 44)
                                     .background(Color.zenAccent)
@@ -148,7 +148,7 @@ struct CompactMainView: View {
 
                         Button(action: stopFocus) {
                             Image(systemName: "stop.fill")
-                                .font(.title3)
+                                .font(.zenBody)
                                 .foregroundColor(.zenBackground)
                                 .frame(width: 44, height: 44)
                                 .background(Color.zenPrimary)
@@ -159,7 +159,7 @@ struct CompactMainView: View {
                 } else if stateManager.currentState == .resting {
                     Button(action: skipBreak) {
                         Image(systemName: "forward.fill")
-                            .font(.title3)
+                            .font(.zenBody)
                             .foregroundColor(.zenBackground)
                             .frame(width: 50, height: 50)
                             .background(Color.zenAccent)

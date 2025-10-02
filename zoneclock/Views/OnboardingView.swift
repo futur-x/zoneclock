@@ -20,7 +20,7 @@ struct OnboardingView: View {
             HStack(spacing: 8) {
                 ForEach(0..<3) { index in
                     Circle()
-                        .fill(currentPage == index ? Color.blue : Color.gray.opacity(0.3))
+                        .fill(currentPage == index ? Color.zenPrimary : Color.zenDisabled)
                         .frame(width: 8, height: 8)
                         .animation(.easeInOut, value: currentPage)
                 }
@@ -50,7 +50,8 @@ struct OnboardingView: View {
                             currentPage -= 1
                         }
                     }
-                    .foregroundColor(.secondary)
+                    .font(.zenBody)
+                    .foregroundColor(.zenSecondary)
                 }
 
                 Spacer()
@@ -61,17 +62,17 @@ struct OnboardingView: View {
                             currentPage += 1
                         }
                     }
-                    .fontWeight(.semibold)
-                    .foregroundColor(.blue)
+                    .font(.zenBody)
+                    .foregroundColor(.zenPrimary)
                 } else {
                     Button("开始使用") {
                         completeOnboarding()
                     }
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .font(.zenBody)
+                    .foregroundColor(.zenBackground)
                     .padding(.horizontal, 30)
                     .padding(.vertical, 12)
-                    .background(Color.blue)
+                    .background(Color.zenAccent)
                     .cornerRadius(25)
                 }
             }
@@ -87,21 +88,22 @@ struct OnboardingView: View {
 
             Image(systemName: "brain.head.profile")
                 .font(.system(size: 100))
-                .foregroundColor(.blue)
+                .foregroundColor(.zenPrimary)
 
             VStack(spacing: 12) {
                 Text("欢迎使用 Zone Clock")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
+                    .font(.zenTitle)
+                    .foregroundColor(.zenPrimary)
 
                 Text("您的专注力管理助手")
-                    .font(.title3)
-                    .foregroundColor(.secondary)
+                    .font(.zenSubheadline)
+                    .foregroundColor(.zenSecondary)
             }
 
             Text("通过科学的时间管理方法\n帮助您保持高效专注")
+                .font(.zenBody)
                 .multilineTextAlignment(.center)
-                .foregroundColor(.secondary)
+                .foregroundColor(.zenSecondary)
                 .padding(.horizontal, 40)
 
             Spacer()
@@ -113,8 +115,8 @@ struct OnboardingView: View {
             Spacer()
 
             Text("核心功能")
-                .font(.largeTitle)
-                .fontWeight(.bold)
+                .font(.zenTitle)
+                .foregroundColor(.zenPrimary)
 
             VStack(alignment: .leading, spacing: 24) {
                 FeatureRow(
@@ -153,37 +155,40 @@ struct OnboardingView: View {
 
             Image(systemName: "bell.badge.fill")
                 .font(.system(size: 80))
-                .foregroundColor(.orange)
+                .foregroundColor(.zenPrimary)
 
             Text("启用通知")
-                .font(.largeTitle)
-                .fontWeight(.bold)
+                .font(.zenTitle)
+                .foregroundColor(.zenPrimary)
 
             Text("我们需要通知权限来提醒您：")
-                .foregroundColor(.secondary)
+                .font(.zenBody)
+                .foregroundColor(.zenSecondary)
 
             VStack(alignment: .leading, spacing: 16) {
                 Label("微休息提醒", systemImage: "pause.circle")
                 Label("专注周期完成", systemImage: "checkmark.circle")
                 Label("休息结束提醒", systemImage: "arrow.clockwise")
             }
-            .font(.body)
+            .font(.zenBody)
+            .foregroundColor(.zenPrimary)
             .padding(.horizontal, 60)
 
             Button(action: requestNotificationPermission) {
                 Label("允许通知", systemImage: "bell")
-                    .fontWeight(.semibold)
-                    .foregroundColor(.white)
+                    .font(.zenBody)
+                    .foregroundColor(.zenBackground)
                     .padding(.horizontal, 40)
                     .padding(.vertical, 12)
-                    .background(Color.orange)
+                    .background(Color.zenAccent)
                     .cornerRadius(25)
             }
 
             Button("稍后设置") {
                 completeOnboarding()
             }
-            .foregroundColor(.secondary)
+            .font(.zenBody)
+            .foregroundColor(.zenSecondary)
 
             Spacer()
         }
@@ -212,19 +217,20 @@ struct FeatureRow: View {
     var body: some View {
         HStack(spacing: 16) {
             Image(systemName: icon)
-                .font(.title2)
-                .foregroundColor(.blue)
+                .font(.zenBody)
+                .foregroundColor(.zenPrimary)
                 .frame(width: 44, height: 44)
-                .background(Color.blue.opacity(0.1))
+                .background(Color.zenPrimary.opacity(0.1))
                 .cornerRadius(10)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.headline)
+                    .font(.zenSubheadline)
+                    .foregroundColor(.zenPrimary)
 
                 Text(description)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    .font(.zenCaption)
+                    .foregroundColor(.zenSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }

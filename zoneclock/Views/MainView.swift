@@ -20,11 +20,7 @@ struct MainView: View {
         NavigationView {
             ZStack {
                 // 背景渐变
-                LinearGradient(
-                    gradient: Gradient(colors: [Color.zenAccent.opacity(0.1), Color.zenAccent.opacity(0.1)]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
+                Color.zenBackground
                 .ignoresSafeArea()
 
                 VStack(spacing: 40) {
@@ -87,8 +83,8 @@ struct MainView: View {
                     .frame(width: 10, height: 10)
 
                 Text(statusText)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .font(.zenCaption)
+                    .foregroundColor(.zenSecondary)
             }
 
             Spacer()
@@ -96,6 +92,7 @@ struct MainView: View {
             // 勿扰模式图标
             if stateManager.isDNDEnabled {
                 Image(systemName: "moon.fill")
+                    .font(.zenCaption)
                     .foregroundColor(.zenAccent)
             }
         }
@@ -107,33 +104,34 @@ struct MainView: View {
             if timerController.currentPhase == .microBreak {
                 // 微休息倒计时
                 Text("微休息")
-                    .font(.title2)
+                    .font(.zenSubheadline)
                     .foregroundColor(.zenSecondary)
 
                 Text("\(timerController.getMicroBreakCountdown())")
-                    .font(.system(size: 60, weight: .bold, design: .rounded))
-                    .foregroundColor(.zenSecondary)
+                    .font(.zenNumber)
+                    .foregroundColor(.zenPrimary)
 
                 Text("秒")
-                    .font(.title3)
-                    .foregroundColor(.orange.opacity(0.8))
+                    .font(.zenCaption)
+                    .foregroundColor(.zenTertiary)
             } else {
                 // 主计时器
                 Text(phaseTitle)
-                    .font(.title2)
-                    .foregroundColor(.secondary)
+                    .font(.zenSubheadline)
+                    .foregroundColor(.zenSecondary)
 
                 Text(timerController.formattedRemainingTime())
-                    .font(.system(size: 72, weight: .bold, design: .rounded))
-                    .foregroundColor(.primary)
+                    .font(.system(size: 72, weight: .ultraLight, design: .rounded))
+                    .foregroundColor(.zenPrimary)
 
                 if timerController.currentPhase == .focusing {
                     HStack(spacing: 4) {
-                        Image(systemName: "flame.fill")
-                            .foregroundColor(.zenSecondary)
+                        Image(systemName: "circle.fill")
+                            .font(.system(size: 6))
+                            .foregroundColor(.zenTertiary)
                         Text("已专注 \(timerController.formattedElapsedTime())")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                            .font(.zenCaption)
+                            .foregroundColor(.zenSecondary)
                     }
                 }
             }
@@ -163,12 +161,12 @@ struct MainView: View {
             VStack(spacing: 8) {
                 if let cycle = stateManager.currentCycle {
                     Text("第 \(cycle.microBreaks + 1) 轮")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        .font(.zenCaption)
+                        .foregroundColor(.zenTertiary)
 
                     Text("\(Int(cycle.completionRate * 100))%")
-                        .font(.title)
-                        .fontWeight(.semibold)
+                        .font(.zenNumberSmall)
+                        .foregroundColor(.zenPrimary)
                 }
             }
         }
@@ -181,9 +179,8 @@ struct MainView: View {
                 // 开始按钮
                 Button(action: startFocus) {
                     Label("开始专注", systemImage: "play.fill")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white)
+                        .font(.zenBody)
+                        .foregroundColor(.zenBackground)
                         .padding(.horizontal, 40)
                         .padding(.vertical, 16)
                         .background(Color.zenAccent)
@@ -195,20 +192,20 @@ struct MainView: View {
                         // 暂停按钮
                         Button(action: pauseFocus) {
                             Image(systemName: "pause.fill")
-                                .font(.title)
-                                .foregroundColor(.zenSecondary)
+                                .font(.zenBody)
+                                .foregroundColor(.zenPrimary)
                                 .frame(width: 60, height: 60)
-                                .background(Color.zenSecondary.opacity(0.2))
+                                .background(Color.zenPrimary.opacity(0.1))
                                 .clipShape(Circle())
                         }
                     } else {
                         // 恢复按钮
                         Button(action: resumeFocus) {
                             Image(systemName: "play.fill")
-                                .font(.title)
+                                .font(.zenBody)
                                 .foregroundColor(.zenPrimary)
                                 .frame(width: 60, height: 60)
-                                .background(Color.zenPrimary.opacity(0.2))
+                                .background(Color.zenPrimary.opacity(0.1))
                                 .clipShape(Circle())
                         }
                     }
@@ -216,10 +213,10 @@ struct MainView: View {
                     // 停止按钮
                     Button(action: stopFocus) {
                         Image(systemName: "stop.fill")
-                            .font(.title)
-                            .foregroundColor(.red)
+                            .font(.zenBody)
+                            .foregroundColor(.zenPrimary)
                             .frame(width: 60, height: 60)
-                            .background(Color.red.opacity(0.2))
+                            .background(Color.zenPrimary.opacity(0.1))
                             .clipShape(Circle())
                     }
                 }
@@ -227,9 +224,8 @@ struct MainView: View {
                 // 跳过休息按钮
                 Button(action: skipBreak) {
                     Label("跳过休息", systemImage: "forward.fill")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white)
+                        .font(.zenBody)
+                        .foregroundColor(.zenBackground)
                         .padding(.horizontal, 30)
                         .padding(.vertical, 16)
                         .background(Color.zenAccent)
@@ -246,34 +242,34 @@ struct MainView: View {
             Button(action: { showStatistics = true }) {
                 VStack(spacing: 4) {
                     Image(systemName: "chart.bar.fill")
-                        .font(.title2)
+                        .font(.zenBody)
                     Text("统计")
-                        .font(.caption)
+                        .font(.zenCaption)
                 }
             }
-            .foregroundColor(.primary)
+            .foregroundColor(.zenPrimary)
 
             // 设置按钮
             Button(action: { showSettings = true }) {
                 VStack(spacing: 4) {
                     Image(systemName: "gearshape.fill")
-                        .font(.title2)
+                        .font(.zenBody)
                     Text("设置")
-                        .font(.caption)
+                        .font(.zenCaption)
                 }
             }
-            .foregroundColor(.primary)
+            .foregroundColor(.zenPrimary)
 
             // 勿扰模式切换
             Button(action: toggleDND) {
                 VStack(spacing: 4) {
                     Image(systemName: stateManager.isDNDEnabled ? "moon.fill" : "moon")
-                        .font(.title2)
+                        .font(.zenBody)
                     Text("勿扰")
-                        .font(.caption)
+                        .font(.zenCaption)
                 }
             }
-            .foregroundColor(stateManager.isDNDEnabled ? .purple : .primary)
+            .foregroundColor(stateManager.isDNDEnabled ? .zenAccent : .zenPrimary)
         }
     }
 
@@ -305,16 +301,16 @@ struct MainView: View {
     private var statusColor: Color {
         switch stateManager.currentState {
         case .uninitialized:
-            return .gray
+            return .zenDisabled
         case .ready:
-            return .green
+            return .zenSecondary
         case .focusing:
             if timerController.currentPhase == .microBreak {
-                return .orange
+                return .zenTertiary
             }
-            return stateManager.currentCycle?.status == .paused ? .yellow : .blue
+            return stateManager.currentCycle?.status == .paused ? .zenDisabled : .zenAccent
         case .resting:
-            return .purple
+            return .zenPrimary
         }
     }
 
@@ -332,26 +328,11 @@ struct MainView: View {
     }
 
     private var progressColor: LinearGradient {
-        switch timerController.currentPhase {
-        case .focusing:
-            return LinearGradient(
-                gradient: Gradient(colors: [Color.zenAccent, Color.zenAccent]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        case .longBreak:
-            return LinearGradient(
-                gradient: Gradient(colors: [Color.zenAccent, Color.pink]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        default:
-            return LinearGradient(
-                gradient: Gradient(colors: [Color.zenSecondary, Color.red]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        }
+        return LinearGradient(
+            gradient: Gradient(colors: [Color.zenProgress, Color.zenProgress]),
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
     }
 
     // MARK: - Actions

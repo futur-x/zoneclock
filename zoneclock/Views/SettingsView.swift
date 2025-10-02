@@ -20,32 +20,40 @@ struct SettingsView: View {
         NavigationView {
             Form {
                 // 专注设置
-                Section(header: Text("专注设置")) {
+                Section(header: Text("专注设置").font(.zenCaption).foregroundColor(.zenSecondary)) {
                     HStack {
                         Text("专注时长")
+                            .font(.zenBody)
+                            .foregroundColor(.zenPrimary)
                         Spacer()
                         Text("\(settings.focusDuration) 分钟")
-                            .foregroundColor(.secondary)
+                            .font(.zenBody)
+                            .foregroundColor(.zenSecondary)
                     }
                     Slider(value: Binding(
                         get: { Double(settings.focusDuration) },
                         set: { settings.focusDuration = Int($0) }
                     ), in: 15...180, step: 5)
+                        .tint(.zenProgress)
 
                     HStack {
                         Text("休息时长")
+                            .font(.zenBody)
+                            .foregroundColor(.zenPrimary)
                         Spacer()
                         Text("\(settings.breakDuration) 分钟")
-                            .foregroundColor(.secondary)
+                            .font(.zenBody)
+                            .foregroundColor(.zenSecondary)
                     }
                     Slider(value: Binding(
                         get: { Double(settings.breakDuration) },
                         set: { settings.breakDuration = Int($0) }
                     ), in: 5...60, step: 5)
+                        .tint(.zenProgress)
                 }
 
                 // 提示音设置
-                Section(header: Text("提示音")) {
+                Section(header: Text("提示音").font(.zenCaption).foregroundColor(.zenSecondary)) {
                     Picker("音效类型", selection: $settings.soundSettings.soundType) {
                         ForEach(SoundType.allCases, id: \.self) { sound in
                             Text(sound.displayName).tag(sound)
@@ -62,26 +70,38 @@ struct SettingsView: View {
                     }) {
                         HStack {
                             Image(systemName: "play.circle.fill")
+                                .font(.zenCaption)
                             Text("试听")
+                                .font(.zenBody)
                         }
+                        .foregroundColor(.zenPrimary)
                     }
 
                     HStack {
                         Text("音量")
+                            .font(.zenBody)
+                            .foregroundColor(.zenPrimary)
                         Slider(value: $settings.soundSettings.volume, in: 0...1)
+                            .tint(.zenProgress)
                     }
 
                     Toggle("振动提醒", isOn: $settings.soundSettings.vibrationEnabled)
+                        .font(.zenBody)
+                        .foregroundColor(.zenPrimary)
                 }
 
                 // 通知设置
-                Section(header: Text("通知")) {
+                Section(header: Text("通知").font(.zenCaption).foregroundColor(.zenSecondary)) {
                     Toggle("启用通知", isOn: $settings.notificationEnabled)
+                        .font(.zenBody)
+                        .foregroundColor(.zenPrimary)
                     Toggle("勿扰模式", isOn: $settings.dndEnabled)
+                        .font(.zenBody)
+                        .foregroundColor(.zenPrimary)
                 }
 
                 // 外观设置
-                Section(header: Text("外观")) {
+                Section(header: Text("外观").font(.zenCaption).foregroundColor(.zenSecondary)) {
                     Picker("主题", selection: $settings.theme) {
                         ForEach(Theme.allCases, id: \.self) { theme in
                             Text(theme.displayName).tag(theme)

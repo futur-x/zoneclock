@@ -89,7 +89,7 @@ struct CompactStatisticsView: View {
                         value: "\(todayStats.totalFocusTime)",
                         unit: "分钟",
                         icon: "clock.fill",
-                        color: .blue
+                        color: .zenAccent
                     )
 
                     CompactStatCard(
@@ -97,7 +97,7 @@ struct CompactStatisticsView: View {
                         value: "\(todayStats.completedCycles)",
                         unit: "个",
                         icon: "checkmark.circle.fill",
-                        color: .green
+                        color: .zenPrimary
                     )
                 }
 
@@ -107,7 +107,7 @@ struct CompactStatisticsView: View {
                         value: "\(todayStats.microBreaksCount)",
                         unit: "次",
                         icon: "pause.circle.fill",
-                        color: .orange
+                        color: .zenSecondary
                     )
 
                     CompactStatCard(
@@ -115,7 +115,7 @@ struct CompactStatisticsView: View {
                         value: "\(Int(todayStats.completionRate * 100))",
                         unit: "%",
                         icon: "percent",
-                        color: .purple
+                        color: .zenProgress
                     )
                 }
             }
@@ -124,20 +124,21 @@ struct CompactStatisticsView: View {
             // 今日时间分布
             VStack(alignment: .leading, spacing: 12) {
                 Text("时间分布")
-                    .font(.headline)
+                    .font(.zenSubheadline)
+                    .foregroundColor(.zenPrimary)
 
                 ProgressBar(
                     title: "专注",
                     value: Float(todayStats.totalFocusTime),
                     maxValue: 480,
-                    color: .blue
+                    color: .zenProgress
                 )
 
                 ProgressBar(
                     title: "休息",
                     value: Float(todayStats.totalBreakTime),
                     maxValue: 120,
-                    color: .green
+                    color: .zenAccent
                 )
             }
             .padding()
@@ -154,23 +155,24 @@ struct CompactStatisticsView: View {
             // 过去7天专注时长图表
             VStack(alignment: .leading, spacing: 12) {
                 Text("过去7天专注时长")
-                    .font(.headline)
+                    .font(.zenSubheadline)
+                    .foregroundColor(.zenPrimary)
 
                 // 简单的柱状图
                 HStack(alignment: .bottom, spacing: 12) {
                     ForEach(0..<min(7, weekData.count), id: \.self) { day in
                         VStack(spacing: 4) {
                             Text("\(weekData[day])")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
+                                .font(.zenCaption)
+                                .foregroundColor(.zenSecondary)
 
                             RoundedRectangle(cornerRadius: 4)
-                                .fill(Color.zenAccent.opacity(0.7))
+                                .fill(Color.zenProgress)
                                 .frame(width: 50, height: max(4, CGFloat(weekData[day]) * 1.8))
 
                             Text(weekDayLabel(day))
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                                .font(.zenCaption)
+                                .foregroundColor(.zenSecondary)
                         }
                     }
                 }
@@ -186,26 +188,32 @@ struct CompactStatisticsView: View {
             VStack(spacing: 12) {
                 HStack {
                     Text("7天总计")
-                        .font(.headline)
+                        .font(.zenSubheadline)
+                        .foregroundColor(.zenPrimary)
                     Spacer()
                     Text("\(weekData.reduce(0, +)) 分钟")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.zenAccent)
+                        .font(.zenNumberSmall)
+                        .foregroundColor(.zenPrimary)
                 }
 
                 HStack {
                     Text("日均专注")
+                        .font(.zenBody)
+                        .foregroundColor(.zenSecondary)
                     Spacer()
                     let avg = weekData.isEmpty ? 0 : weekData.reduce(0, +) / weekData.count
                     Text("\(avg) 分钟")
-                        .foregroundColor(.secondary)
+                        .font(.zenBody)
+                        .foregroundColor(.zenSecondary)
                 }
 
                 HStack {
                     Text("最高记录")
+                        .font(.zenBody)
+                        .foregroundColor(.zenSecondary)
                     Spacer()
                     Text("\(weekData.max() ?? 0) 分钟")
+                        .font(.zenBody)
                         .foregroundColor(.zenPrimary)
                 }
             }
@@ -223,60 +231,68 @@ struct CompactStatisticsView: View {
             // 趋势指标
             VStack(alignment: .leading, spacing: 16) {
                 Text("30天趋势")
-                    .font(.headline)
+                    .font(.zenSubheadline)
+                    .foregroundColor(.zenPrimary)
 
                 if trendData.focusTimeImprovement != 0 || trendData.completionRateImprovement != 0 {
                     // 专注时长趋势
                     HStack {
                         Image(systemName: trendData.focusTimeImprovement >= 0 ? "arrow.up.right" : "arrow.down.right")
-                            .foregroundColor(trendData.focusTimeImprovement >= 0 ? .green : .orange)
+                            .font(.zenCaption)
+                            .foregroundColor(trendData.focusTimeImprovement >= 0 ? .zenPrimary : .zenSecondary)
                         Text("专注时长\(trendData.focusTimeImprovement >= 0 ? "提升" : "下降") \(abs(Int(trendData.focusTimeImprovement * 100)))%")
-                            .foregroundColor(trendData.focusTimeImprovement >= 0 ? .green : .orange)
+                            .font(.zenBody)
+                            .foregroundColor(trendData.focusTimeImprovement >= 0 ? .zenPrimary : .zenSecondary)
                     }
 
                     // 完成率趋势
                     HStack {
                         Image(systemName: trendData.completionRateImprovement >= 0 ? "arrow.up.right" : "arrow.down.right")
-                            .foregroundColor(trendData.completionRateImprovement >= 0 ? .green : .orange)
+                            .font(.zenCaption)
+                            .foregroundColor(trendData.completionRateImprovement >= 0 ? .zenPrimary : .zenSecondary)
                         Text("完成率\(trendData.completionRateImprovement >= 0 ? "提升" : "下降") \(abs(Int(trendData.completionRateImprovement * 100)))%")
-                            .foregroundColor(trendData.completionRateImprovement >= 0 ? .green : .orange)
+                            .font(.zenBody)
+                            .foregroundColor(trendData.completionRateImprovement >= 0 ? .zenPrimary : .zenSecondary)
                     }
 
                     Text(trendData.focusTimeImprovement >= 0 && trendData.completionRateImprovement >= 0 ? "您的专注力正在稳步提升！" : "继续努力，保持专注！")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        .font(.zenCaption)
+                        .foregroundColor(.zenTertiary)
                 } else {
                     Text("暂无足够数据分析趋势")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .font(.zenBody)
+                        .foregroundColor(.zenSecondary)
                 }
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background((trendData.focusTimeImprovement >= 0 && trendData.completionRateImprovement >= 0) ? Color.zenPrimary.opacity(0.1) : Color.zenCardBackground)
+            .background(Color.zenCardBackground)
             .cornerRadius(12)
             .padding(.horizontal)
 
             // 最佳专注时段
             VStack(alignment: .leading, spacing: 12) {
                 Text("最佳专注时段")
-                    .font(.headline)
+                    .font(.zenSubheadline)
+                    .foregroundColor(.zenPrimary)
 
                 if peakHours.isEmpty {
                     Text("暂无数据")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .font(.zenBody)
+                        .foregroundColor(.zenSecondary)
                 } else {
                     ForEach(peakHours, id: \.hour) { item in
                         HStack {
                             Text("\(item.hour):00 - \(item.hour + 1):00")
-                                .font(.subheadline)
+                                .font(.zenBody)
+                                .foregroundColor(.zenPrimary)
                                 .frame(width: 120, alignment: .leading)
                             ProgressView(value: item.productivity)
+                                .tint(.zenProgress)
                                 .frame(maxWidth: .infinity)
                             Text("\(Int(item.productivity * 100))%")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                                .font(.zenCaption)
+                                .foregroundColor(.zenSecondary)
                                 .frame(width: 40, alignment: .trailing)
                         }
                     }
@@ -327,22 +343,21 @@ struct CompactStatCard: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Image(systemName: icon)
-                    .font(.caption)
+                    .font(.zenCaption)
                     .foregroundColor(color)
                 Spacer()
             }
 
             Text(title)
-                .font(.caption)
-                .foregroundColor(.secondary)
+                .font(.zenCaption)
+                .foregroundColor(.zenSecondary)
 
             HStack(alignment: .lastTextBaseline, spacing: 2) {
                 Text(value)
-                    .font(.title2)
-                    .fontWeight(.bold)
+                    .font(.zenNumberSmall)
                 Text(unit)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    .font(.zenCaption)
+                    .foregroundColor(.zenSecondary)
             }
         }
         .padding()
