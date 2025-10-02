@@ -22,22 +22,18 @@ struct CompactStatisticsView: View {
             // 标题栏
             HStack {
                 Text("统计")
-                    .font(.headline)
-                    .fontWeight(.semibold)
+                    .font(.zenHeadline)
+                    .foregroundColor(.zenPrimary)
 
                 Spacer()
 
                 Button("完成") {
                     dismiss()
                 }
-                .buttonStyle(.borderedProminent)
+                .zenButton()
             }
             .padding()
-            #if os(macOS)
-            .background(Color(NSColor.windowBackgroundColor))
-            #else
-            .background(Color(UIColor.systemBackground))
-            #endif
+            .background(Color.zenBackground)
 
             Divider()
 
@@ -145,7 +141,7 @@ struct CompactStatisticsView: View {
                 )
             }
             .padding()
-            .background(Color.gray.opacity(0.1))
+            .background(Color.zenCardBackground)
             .cornerRadius(12)
             .padding(.horizontal)
         }
@@ -169,7 +165,7 @@ struct CompactStatisticsView: View {
                                 .foregroundColor(.secondary)
 
                             RoundedRectangle(cornerRadius: 4)
-                                .fill(Color.blue.opacity(0.7))
+                                .fill(Color.zenAccent.opacity(0.7))
                                 .frame(width: 50, height: max(4, CGFloat(weekData[day]) * 1.8))
 
                             Text(weekDayLabel(day))
@@ -182,7 +178,7 @@ struct CompactStatisticsView: View {
                 .padding()
             }
             .padding()
-            .background(Color.gray.opacity(0.1))
+            .background(Color.zenCardBackground)
             .cornerRadius(12)
             .padding(.horizontal)
 
@@ -195,7 +191,7 @@ struct CompactStatisticsView: View {
                     Text("\(weekData.reduce(0, +)) 分钟")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundColor(.blue)
+                        .foregroundColor(.zenAccent)
                 }
 
                 HStack {
@@ -210,11 +206,11 @@ struct CompactStatisticsView: View {
                     Text("最高记录")
                     Spacer()
                     Text("\(weekData.max() ?? 0) 分钟")
-                        .foregroundColor(.green)
+                        .foregroundColor(.zenPrimary)
                 }
             }
             .padding()
-            .background(Color.gray.opacity(0.1))
+            .background(Color.zenCardBackground)
             .cornerRadius(12)
             .padding(.horizontal)
         }
@@ -257,7 +253,7 @@ struct CompactStatisticsView: View {
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background((trendData.focusTimeImprovement >= 0 && trendData.completionRateImprovement >= 0) ? Color.green.opacity(0.1) : Color.gray.opacity(0.1))
+            .background((trendData.focusTimeImprovement >= 0 && trendData.completionRateImprovement >= 0) ? Color.zenPrimary.opacity(0.1) : Color.zenCardBackground)
             .cornerRadius(12)
             .padding(.horizontal)
 
@@ -287,7 +283,7 @@ struct CompactStatisticsView: View {
                 }
             }
             .padding()
-            .background(Color.gray.opacity(0.1))
+            .background(Color.zenCardBackground)
             .cornerRadius(12)
             .padding(.horizontal)
         }

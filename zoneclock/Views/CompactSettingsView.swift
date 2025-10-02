@@ -21,22 +21,18 @@ struct CompactSettingsView: View {
             // 标题栏
             HStack {
                 Text("设置")
-                    .font(.headline)
-                    .fontWeight(.semibold)
+                    .font(.zenHeadline)
+                    .foregroundColor(.zenPrimary)
 
                 Spacer()
 
                 Button("完成") {
                     saveSettings()
                 }
-                .buttonStyle(.borderedProminent)
+                .zenButton()
             }
             .padding()
-            #if os(macOS)
-            .background(Color(NSColor.windowBackgroundColor))
-            #else
-            .background(Color(UIColor.systemBackground))
-            #endif
+            .background(Color.zenBackground)
 
             Divider()
 
@@ -46,50 +42,56 @@ struct CompactSettingsView: View {
                     // 专注设置
                     VStack(alignment: .leading, spacing: 12) {
                         Text("专注设置")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.secondary)
+                            .font(.zenSubheadline)
+                            .foregroundColor(.zenSecondary)
 
                         VStack(spacing: 12) {
                             HStack {
                                 Text("专注时长")
+                                    .font(.zenBody)
+                                    .foregroundColor(.zenPrimary)
                                     .frame(width: 80, alignment: .leading)
                                 Slider(value: Binding(
                                     get: { Double(settings.focusDuration) },
                                     set: { settings.focusDuration = Int($0) }
                                 ), in: 15...180, step: 5)
+                                .tint(.zenProgress)
                                 Text("\(settings.focusDuration) 分钟")
+                                    .font(.zenCaption)
                                     .frame(width: 70, alignment: .trailing)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(.zenSecondary)
                             }
 
                             HStack {
                                 Text("休息时长")
+                                    .font(.zenBody)
+                                    .foregroundColor(.zenPrimary)
                                     .frame(width: 80, alignment: .leading)
                                 Slider(value: Binding(
                                     get: { Double(settings.breakDuration) },
                                     set: { settings.breakDuration = Int($0) }
                                 ), in: 5...60, step: 5)
+                                .tint(.zenProgress)
                                 Text("\(settings.breakDuration) 分钟")
+                                    .font(.zenCaption)
                                     .frame(width: 70, alignment: .trailing)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(.zenSecondary)
                             }
                         }
-                        .padding()
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(8)
+                        .zenCard()
                     }
 
                     // 提示音设置
                     VStack(alignment: .leading, spacing: 12) {
                         Text("提示音")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.secondary)
+                            .font(.zenSubheadline)
+                            .foregroundColor(.zenSecondary)
 
                         VStack(spacing: 12) {
                             HStack {
                                 Text("音效类型")
+                                    .font(.zenBody)
+                                    .foregroundColor(.zenPrimary)
                                     .frame(width: 80, alignment: .leading)
                                 Picker("", selection: $settings.soundSettings.soundType) {
                                     ForEach(SoundType.allCases, id: \.self) { sound in
@@ -109,53 +111,60 @@ struct CompactSettingsView: View {
                                     AudioPlayer.shared.playMicroBreakSound()
                                 }) {
                                     Image(systemName: "play.circle.fill")
-                                        .font(.title3)
+                                        .font(.zenBody)
+                                        .foregroundColor(.zenAccent)
                                 }
                                 .buttonStyle(PlainButtonStyle())
                             }
 
                             HStack {
                                 Text("音量")
+                                    .font(.zenBody)
+                                    .foregroundColor(.zenPrimary)
                                     .frame(width: 80, alignment: .leading)
                                 Slider(value: $settings.soundSettings.volume, in: 0...1)
+                                    .tint(.zenProgress)
                                 Text("\(Int(settings.soundSettings.volume * 100))%")
+                                    .font(.zenCaption)
                                     .frame(width: 70, alignment: .trailing)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(.zenSecondary)
                             }
 
                             Toggle("振动提醒", isOn: $settings.soundSettings.vibrationEnabled)
+                                .font(.zenBody)
+                                .tint(.zenProgress)
                         }
-                        .padding()
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(8)
+                        .zenCard()
                     }
 
                     // 通知设置
                     VStack(alignment: .leading, spacing: 12) {
                         Text("通知")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.secondary)
+                            .font(.zenSubheadline)
+                            .foregroundColor(.zenSecondary)
 
                         VStack(spacing: 12) {
                             Toggle("启用通知", isOn: $settings.notificationEnabled)
+                                .font(.zenBody)
+                                .tint(.zenProgress)
                             Toggle("勿扰模式", isOn: $settings.dndEnabled)
+                                .font(.zenBody)
+                                .tint(.zenProgress)
                         }
-                        .padding()
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(8)
+                        .zenCard()
                     }
 
                     // 外观设置
                     VStack(alignment: .leading, spacing: 12) {
                         Text("外观")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.secondary)
+                            .font(.zenSubheadline)
+                            .foregroundColor(.zenSecondary)
 
                         VStack(spacing: 12) {
                             HStack {
                                 Text("主题")
+                                    .font(.zenBody)
+                                    .foregroundColor(.zenPrimary)
                                     .frame(width: 80, alignment: .leading)
                                 Picker("", selection: $settings.theme) {
                                     ForEach(Theme.allCases, id: \.self) { theme in
@@ -165,9 +174,7 @@ struct CompactSettingsView: View {
                                 .labelsHidden()
                             }
                         }
-                        .padding()
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(8)
+                        .zenCard()
                     }
                 }
                 .padding()
