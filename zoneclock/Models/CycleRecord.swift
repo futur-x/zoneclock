@@ -9,7 +9,7 @@
 import Foundation
 
 /// 专注周期记录 - 用于持久化和统计
-struct CycleRecord: Codable, Identifiable {
+struct CycleRecord: Identifiable, Codable {
     let id: UUID
     let cycleId: UUID              // 关联的周期ID
     let date: Date                 // 记录日期
@@ -19,6 +19,7 @@ struct CycleRecord: Codable, Identifiable {
     let completionRate: Float      // 完成率
     let wasCompleted: Bool         // 是否完成（true=完成，false=停止）
 
+    // 自定义初始化器（从Cycle创建）
     init(fromCycle cycle: Cycle) {
         self.id = UUID()
         self.cycleId = cycle.cycleId
@@ -29,6 +30,8 @@ struct CycleRecord: Codable, Identifiable {
         self.completionRate = cycle.completionRate
         self.wasCompleted = cycle.status == .completed
     }
+
+    // Codable会自动合成init(from:)和encode(to:)
 }
 
 /// 数据存储管理器

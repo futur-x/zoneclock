@@ -13,7 +13,7 @@ struct MicroBreak: Identifiable, Codable {
     let breakId: UUID
     let cycleId: UUID
     let triggerTime: Date
-    let duration: Int = 10          // 固定10秒（契约BR003）
+    let duration: Int               // 固定10秒（契约BR003）
     var breakCount: Int             // 本周期第几次微休息
     var nextBreakIn: Int?           // 下次微休息间隔（秒）
 
@@ -23,6 +23,7 @@ struct MicroBreak: Identifiable, Codable {
         self.breakId = UUID()
         self.cycleId = cycleId
         self.triggerTime = Date()
+        self.duration = 10          // 固定10秒（契约BR003）
         self.breakCount = breakCount
 
         // 随机生成下次微休息间隔（2-5分钟）- 契约BR002
