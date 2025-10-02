@@ -159,6 +159,79 @@ class DataStore {
         )
     }
 
+    // MARK: - Trend Analysis Methods
+
+    /// 获取30天趋势数据
+    func get30DaysTrend() -> (focusTimeImprovement: Float, completionRateImprovement: Float) {
+        let calendar = Calendar.current
+        let today = Date()
+
+        // 获取过去30天的数据
+        guard let past30DaysStart = calendar.date(byAdding: .day, value: -30, to: today) else {
+            return (0, 0)
+        }
+        let past30DaysRecords = loadAllRecords().filter { record in
+            record.date >= past30DaysStart && record.date <= today
+        }
+
+        // 获取前30天的数据（用于对比）
+        guard let previous30DaysStart = calendar.date(byAdding: .day, value: -60, to: today) else {
+            return (0, 0)
+        }
+        let previous30DaysRecords = loadAllRecords().filter { record in
+            record.date >= previous30DaysStart && record.date < past30DaysStart
+        }
+
+        // 计算过去30天的平均专注时长和完成率
+        let past30DaysStats = calculateStatistics(from: past30DaysRecords)
+        let previous30DaysStats = calculateStatistics(from: previous30DaysRecords)
+
+        // 计算提升率
+        var focusTimeImprovement: Float = 0
+        if previous30DaysStats.totalFocusTime > 0 {
+            focusTimeImprovement = Float(past30DaysStats.totalFocusTime - previous30DaysStats.totalFocusTime) / Float(previous30DaysStats.totalFocusTime)
+        }
+
+        var completionRateImprovement: Float = 0
+        if previous30DaysStats.completionRate > 0 {
+            completionRateImprovement = (past30DaysStats.completionRate - previous30DaysStats.completionRate) / previous30DaysStats.completionRate
+        }
+
+        return (focusTimeImprovement, completionRateImprovement)
+    }
+
+    /// 获取最佳专注时段（返回每小时的效率数据）
+    func getPeakFocusHours() -> [(hour: Int, productivity: Double)] {
+        let records = loadAllRecords()
+        let calendar = Calendar.current
+
+        // 统计每个小时的专注数据
+        var hourlyStats: [Int: (totalDuration: Int, totalCompletion: Float, count: Int)] = [:]
+
+        for record in records {
+            let hour = calendar.component(.hour, from: record.date)
+            let existing = hourlyStats[hour] ?? (0, 0, 0)
+            hourlyStats[hour] = (
+                existing.totalDuration + record.actualDuration,
+                existing.totalCompletion + record.completionRate,
+                existing.count + 1
+            )
+        }
+
+        // 计算每个小时的平均效率（完成率）
+        var peakHours: [(hour: Int, productivity: Double)] = []
+        for (hour, stats) in hourlyStats {
+            if stats.count > 0 {
+                let avgProductivity = Double(stats.totalCompletion) / Double(stats.count)
+                peakHours.append((hour, avgProductivity))
+            }
+        }
+
+        // 按效率降序排序，取前4个
+        peakHours.sort { $0.productivity > $1.productivity }
+        return Array(peakHours.prefix(4))
+    }
+
     // MARK: - Utility Methods
 
     /// 清除所有记录（用于测试）

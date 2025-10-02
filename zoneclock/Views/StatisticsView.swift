@@ -14,6 +14,8 @@ struct StatisticsView: View {
     @State private var selectedTab = 0
     @State private var todayStats = DailyStatistics()
     @State private var weekStats: [DailyStatistics] = []
+    @State private var trendData: (focusTimeImprovement: Float, completionRateImprovement: Float) = (0, 0)
+    @State private var peakHours: [(hour: Int, productivity: Double)] = []
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
@@ -72,6 +74,8 @@ struct StatisticsView: View {
     private func loadStatistics() {
         todayStats = DataStore.shared.getTodayStatistics()
         weekStats = DataStore.shared.getWeekStatistics()
+        trendData = DataStore.shared.get30DaysTrend()
+        peakHours = DataStore.shared.getPeakFocusHours()
         print("📊 Loaded statistics - Today: \(todayStats.totalFocusTime)min")
     }
 
@@ -218,27 +222,35 @@ struct StatisticsView: View {
                 Text("30天趋势")
                     .font(.headline)
 
-                HStack {
-                    Image(systemName: "arrow.up.right")
-                        .foregroundColor(.green)
-                    Text("专注时长提升 15%")
-                        .foregroundColor(.green)
-                }
+                if trendData.focusTimeImprovement != 0 || trendData.completionRateImprovement != 0 {
+                    // 专注时长趋势
+                    HStack {
+                        Image(systemName: trendData.focusTimeImprovement >= 0 ? "arrow.up.right" : "arrow.down.right")
+                            .foregroundColor(trendData.focusTimeImprovement >= 0 ? .green : .orange)
+                        Text("专注时长\(trendData.focusTimeImprovement >= 0 ? "提升" : "下降") \(abs(Int(trendData.focusTimeImprovement * 100)))%")
+                            .foregroundColor(trendData.focusTimeImprovement >= 0 ? .green : .orange)
+                    }
 
-                HStack {
-                    Image(systemName: "arrow.up.right")
-                        .foregroundColor(.green)
-                    Text("完成率提升 8%")
-                        .foregroundColor(.green)
-                }
+                    // 完成率趋势
+                    HStack {
+                        Image(systemName: trendData.completionRateImprovement >= 0 ? "arrow.up.right" : "arrow.down.right")
+                            .foregroundColor(trendData.completionRateImprovement >= 0 ? .green : .orange)
+                        Text("完成率\(trendData.completionRateImprovement >= 0 ? "提升" : "下降") \(abs(Int(trendData.completionRateImprovement * 100)))%")
+                            .foregroundColor(trendData.completionRateImprovement >= 0 ? .green : .orange)
+                    }
 
-                Text("您的专注力正在稳步提升！")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    Text(trendData.focusTimeImprovement >= 0 && trendData.completionRateImprovement >= 0 ? "您的专注力正在稳步提升！" : "继续努力，保持专注！")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                } else {
+                    Text("暂无足够数据分析趋势")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.green.opacity(0.1))
+            .background((trendData.focusTimeImprovement >= 0 && trendData.completionRateImprovement >= 0) ? Color.green.opacity(0.1) : Color.gray.opacity(0.1))
             .cornerRadius(12)
             .padding(.horizontal)
 
@@ -247,16 +259,22 @@ struct StatisticsView: View {
                 Text("最佳专注时段")
                     .font(.headline)
 
-                ForEach(peakHours, id: \.0) { hour, productivity in
-                    HStack {
-                        Text("\(hour):00 - \(hour + 1):00")
-                            .font(.subheadline)
-                        Spacer()
-                        ProgressView(value: productivity)
-                            .frame(width: 150)
-                        Text("\(Int(productivity * 100))%")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                if peakHours.isEmpty {
+                    Text("暂无数据")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                } else {
+                    ForEach(peakHours, id: \.hour) { item in
+                        HStack {
+                            Text("\(item.hour):00 - \(item.hour + 1):00")
+                                .font(.subheadline)
+                            Spacer()
+                            ProgressView(value: item.productivity)
+                                .frame(width: 150)
+                            Text("\(Int(item.productivity * 100))%")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                     }
                 }
             }
@@ -271,10 +289,6 @@ struct StatisticsView: View {
     private var weekData: [Int] {
         // 从真实数据获取每天的专注时长
         return weekStats.map { $0.totalFocusTime }
-    }
-
-    private var peakHours: [(Int, Double)] {
-        [(9, 0.9), (10, 0.85), (14, 0.75), (15, 0.8)]
     }
 
     private func weekDayLabel(_ index: Int) -> String {
