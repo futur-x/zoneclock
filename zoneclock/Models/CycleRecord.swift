@@ -31,7 +31,30 @@ struct CycleRecord: Identifiable, Codable {
         self.wasCompleted = cycle.status == .completed
     }
 
-    // Codable会自动合成init(from:)和encode(to:)
+    // Codable 所需的初始化器
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try container.decode(UUID.self, forKey: .id)
+        self.cycleId = try container.decode(UUID.self, forKey: .cycleId)
+        self.date = try container.decode(Date.self, forKey: .date)
+        self.plannedDuration = try container.decode(Int.self, forKey: .plannedDuration)
+        self.actualDuration = try container.decode(Int.self, forKey: .actualDuration)
+        self.microBreaksCount = try container.decode(Int.self, forKey: .microBreaksCount)
+        self.completionRate = try container.decode(Float.self, forKey: .completionRate)
+        self.wasCompleted = try container.decode(Bool.self, forKey: .wasCompleted)
+    }
+
+    // 显式定义 CodingKeys 以支持 Codable
+    enum CodingKeys: String, CodingKey {
+        case id
+        case cycleId
+        case date
+        case plannedDuration
+        case actualDuration
+        case microBreaksCount
+        case completionRate
+        case wasCompleted
+    }
 }
 
 /// 数据存储管理器

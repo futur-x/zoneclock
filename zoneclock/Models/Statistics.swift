@@ -32,6 +32,23 @@ struct DailyStatistics: Codable {
         let calendar = Calendar.current
         self.date = calendar.startOfDay(for: date)
     }
+
+    init(date: Date = Date(),
+         totalFocusTime: Int,
+         completedCycles: Int,
+         microBreaksCount: Int,
+         completionRate: Float,
+         totalBreakTime: Int) {
+        let calendar = Calendar.current
+        self.date = calendar.startOfDay(for: date)
+        self.totalFocusTime = totalFocusTime
+        self.completedCycles = completedCycles
+        self.microBreaksCount = microBreaksCount
+        self.totalBreakTime = totalBreakTime
+        // completionRate 是计算属性，不需要设置
+        // totalCycles 可以从 completedCycles 计算得出（假设所有周期都完成了，或者保持为0）
+        self.totalCycles = completedCycles
+    }
 }
 
 /// 周期统计数据 - 符合契约定义
