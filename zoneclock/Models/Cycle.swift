@@ -32,7 +32,28 @@ struct Cycle: Identifiable, Codable {
     var completionRate: Float {     // 完成率
         guard duration > 0 else { return 0 }
         let plannedSeconds = Float(duration * 60)
+
+        // 如果周期还在进行中，使用实时计算
+        if status == .active || status == .paused {
+            let currentDuration = getCurrentDuration()
+            return min(1.0, Float(currentDuration) / plannedSeconds)
+        }
+
+        // 已完成或停止的周期使用记录的 actualDuration
         return Float(actualDuration) / plannedSeconds
+    }
+
+    /// 获取当前实时时长（秒）
+    func getCurrentDuration() -> Int {
+        let elapsed = Int(Date().timeIntervalSince(startTime))
+
+        // 如果当前是暂停状态，需要减去暂停时间
+        if status == .paused, let pauseStart = pauseStartTime {
+            let currentPauseDuration = Int(Date().timeIntervalSince(pauseStart))
+            return elapsed - pausedDuration - currentPauseDuration
+        }
+
+        return elapsed - pausedDuration
     }
 
     // MARK: - 暂停相关

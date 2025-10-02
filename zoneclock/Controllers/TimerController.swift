@@ -121,6 +121,10 @@ class TimerController: ObservableObject {
             if elapsedTime >= nextMicroBreakTime {
                 triggerMicroBreak()
             }
+
+            // 触发界面更新（让 currentCycle 的 completionRate 重新计算）
+            objectWillChange.send()
+            stateManager?.objectWillChange.send()
         }
 
         // 检查是否完成
