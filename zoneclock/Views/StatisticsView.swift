@@ -141,7 +141,7 @@ struct StatisticsView: View {
                 )
             }
             .padding()
-            .background(Color.gray.opacity(0.1))
+            .background(Color.zenCardBackground)
             .cornerRadius(12)
             .padding(.horizontal)
         }
@@ -164,7 +164,7 @@ struct StatisticsView: View {
                                 .foregroundColor(.secondary)
 
                             RoundedRectangle(cornerRadius: 4)
-                                .fill(Color.blue.opacity(0.7))
+                                .fill(Color.zenAccent.opacity(0.7))
                                 .frame(width: 40, height: max(4, CGFloat(weekData[day]) * 2))
 
                             Text(weekDayLabel(day))
@@ -175,7 +175,7 @@ struct StatisticsView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.gray.opacity(0.1))
+                .background(Color.zenCardBackground)
                 .cornerRadius(12)
             }
             .padding(.horizontal)
@@ -189,7 +189,7 @@ struct StatisticsView: View {
                     Text("\(weekData.reduce(0, +)) 分钟")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundColor(.blue)
+                        .foregroundColor(.zenAccent)
                 }
 
                 HStack {
@@ -204,11 +204,11 @@ struct StatisticsView: View {
                     Text("最高记录")
                     Spacer()
                     Text("\(weekData.max() ?? 0) 分钟")
-                        .foregroundColor(.green)
+                        .foregroundColor(.zenPrimary)
                 }
             }
             .padding()
-            .background(Color.gray.opacity(0.1))
+            .background(Color.zenCardBackground)
             .cornerRadius(12)
             .padding(.horizontal)
         }
@@ -250,7 +250,7 @@ struct StatisticsView: View {
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background((trendData.focusTimeImprovement >= 0 && trendData.completionRateImprovement >= 0) ? Color.green.opacity(0.1) : Color.gray.opacity(0.1))
+            .background((trendData.focusTimeImprovement >= 0 && trendData.completionRateImprovement >= 0) ? Color.zenPrimary.opacity(0.1) : Color.zenCardBackground)
             .cornerRadius(12)
             .padding(.horizontal)
 
@@ -279,7 +279,7 @@ struct StatisticsView: View {
                 }
             }
             .padding()
-            .background(Color.gray.opacity(0.1))
+            .background(Color.zenCardBackground)
             .cornerRadius(12)
             .padding(.horizontal)
         }
@@ -372,7 +372,7 @@ struct ProgressBar: View {
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
                     RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.gray.opacity(0.2))
+                        .fill(Color.zenProgressBackground)
                         .frame(height: 8)
 
                     RoundedRectangle(cornerRadius: 4)

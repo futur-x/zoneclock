@@ -21,7 +21,7 @@ struct MainView: View {
             ZStack {
                 // 背景渐变
                 LinearGradient(
-                    gradient: Gradient(colors: [Color.blue.opacity(0.1), Color.purple.opacity(0.1)]),
+                    gradient: Gradient(colors: [Color.zenAccent.opacity(0.1), Color.zenAccent.opacity(0.1)]),
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -96,7 +96,7 @@ struct MainView: View {
             // 勿扰模式图标
             if stateManager.isDNDEnabled {
                 Image(systemName: "moon.fill")
-                    .foregroundColor(.purple)
+                    .foregroundColor(.zenAccent)
             }
         }
     }
@@ -108,11 +108,11 @@ struct MainView: View {
                 // 微休息倒计时
                 Text("微休息")
                     .font(.title2)
-                    .foregroundColor(.orange)
+                    .foregroundColor(.zenSecondary)
 
                 Text("\(timerController.getMicroBreakCountdown())")
                     .font(.system(size: 60, weight: .bold, design: .rounded))
-                    .foregroundColor(.orange)
+                    .foregroundColor(.zenSecondary)
 
                 Text("秒")
                     .font(.title3)
@@ -130,7 +130,7 @@ struct MainView: View {
                 if timerController.currentPhase == .focusing {
                     HStack(spacing: 4) {
                         Image(systemName: "flame.fill")
-                            .foregroundColor(.orange)
+                            .foregroundColor(.zenSecondary)
                         Text("已专注 \(timerController.formattedElapsedTime())")
                             .font(.caption)
                             .foregroundColor(.secondary)
@@ -145,7 +145,7 @@ struct MainView: View {
         ZStack {
             // 背景环
             Circle()
-                .stroke(Color.gray.opacity(0.2), lineWidth: 12)
+                .stroke(Color.zenProgressBackground, lineWidth: 12)
                 .frame(width: 240, height: 240)
 
             // 进度环
@@ -186,7 +186,7 @@ struct MainView: View {
                         .foregroundColor(.white)
                         .padding(.horizontal, 40)
                         .padding(.vertical, 16)
-                        .background(Color.blue)
+                        .background(Color.zenAccent)
                         .cornerRadius(30)
                 }
             } else if stateManager.currentState == .focusing {
@@ -196,9 +196,9 @@ struct MainView: View {
                         Button(action: pauseFocus) {
                             Image(systemName: "pause.fill")
                                 .font(.title)
-                                .foregroundColor(.orange)
+                                .foregroundColor(.zenSecondary)
                                 .frame(width: 60, height: 60)
-                                .background(Color.orange.opacity(0.2))
+                                .background(Color.zenSecondary.opacity(0.2))
                                 .clipShape(Circle())
                         }
                     } else {
@@ -206,9 +206,9 @@ struct MainView: View {
                         Button(action: resumeFocus) {
                             Image(systemName: "play.fill")
                                 .font(.title)
-                                .foregroundColor(.green)
+                                .foregroundColor(.zenPrimary)
                                 .frame(width: 60, height: 60)
-                                .background(Color.green.opacity(0.2))
+                                .background(Color.zenPrimary.opacity(0.2))
                                 .clipShape(Circle())
                         }
                     }
@@ -232,7 +232,7 @@ struct MainView: View {
                         .foregroundColor(.white)
                         .padding(.horizontal, 30)
                         .padding(.vertical, 16)
-                        .background(Color.purple)
+                        .background(Color.zenAccent)
                         .cornerRadius(30)
                 }
             }
@@ -335,19 +335,19 @@ struct MainView: View {
         switch timerController.currentPhase {
         case .focusing:
             return LinearGradient(
-                gradient: Gradient(colors: [Color.blue, Color.purple]),
+                gradient: Gradient(colors: [Color.zenAccent, Color.zenAccent]),
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
         case .longBreak:
             return LinearGradient(
-                gradient: Gradient(colors: [Color.purple, Color.pink]),
+                gradient: Gradient(colors: [Color.zenAccent, Color.pink]),
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
         default:
             return LinearGradient(
-                gradient: Gradient(colors: [Color.orange, Color.red]),
+                gradient: Gradient(colors: [Color.zenSecondary, Color.red]),
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
