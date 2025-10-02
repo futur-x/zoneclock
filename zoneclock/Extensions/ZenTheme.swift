@@ -24,8 +24,14 @@ extension Color {
     /// 主文字颜色 - 深灰黑
     static let zenPrimary = Color(white: 0.15)
 
-    /// 次要文字颜色 - 中灰
-    static let zenSecondary = Color(white: 0.5)
+    /// 次要文字颜色 - 中灰（iOS端更深）
+    static var zenSecondary: Color {
+        #if os(iOS)
+        return Color(white: 0.35)  // iOS用更深的灰色
+        #else
+        return Color(white: 0.5)   // macOS保持中灰
+        #endif
+    }
 
     /// 辅助文字颜色 - 浅灰
     static let zenTertiary = Color(white: 0.65)
