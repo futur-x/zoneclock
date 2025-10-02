@@ -30,7 +30,9 @@ struct CompactStatisticsView: View {
                 Button("完成") {
                     dismiss()
                 }
-                .zenButton()
+                .font(.zenBody)
+                .foregroundColor(.zenPrimary)
+                .buttonStyle(PlainButtonStyle())
             }
             .padding()
             .background(Color.zenBackground)

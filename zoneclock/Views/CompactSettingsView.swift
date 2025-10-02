@@ -29,7 +29,9 @@ struct CompactSettingsView: View {
                 Button("完成") {
                     saveSettings()
                 }
-                .zenButton()
+                .font(.zenBody)
+                .foregroundColor(.zenPrimary)
+                .buttonStyle(PlainButtonStyle())
             }
             .padding()
             .background(Color.zenBackground)
@@ -154,7 +156,7 @@ struct CompactSettingsView: View {
                         .zenCard()
                     }
 
-                    // 外观设置
+                    // 外观设置（暂未启用）
                     VStack(alignment: .leading, spacing: 12) {
                         Text("外观")
                             .font(.zenSubheadline)
@@ -172,9 +174,14 @@ struct CompactSettingsView: View {
                                     }
                                 }
                                 .labelsHidden()
+                                .disabled(true)
+                                Text("即将推出")
+                                    .font(.zenCaption)
+                                    .foregroundColor(.zenTertiary)
                             }
                         }
                         .zenCard()
+                        .opacity(0.6)
                     }
                 }
                 .padding()

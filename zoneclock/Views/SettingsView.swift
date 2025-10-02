@@ -100,13 +100,23 @@ struct SettingsView: View {
                         .foregroundColor(.zenPrimary)
                 }
 
-                // 外观设置
+                // 外观设置（暂未启用）
                 Section(header: Text("外观").font(.zenCaption).foregroundColor(.zenSecondary)) {
-                    Picker("主题", selection: $settings.theme) {
-                        ForEach(Theme.allCases, id: \.self) { theme in
-                            Text(theme.displayName).tag(theme)
+                    HStack {
+                        Picker("主题", selection: $settings.theme) {
+                            ForEach(Theme.allCases, id: \.self) { theme in
+                                Text(theme.displayName).tag(theme)
+                            }
                         }
+                        .disabled(true)
+
+                        Spacer()
+
+                        Text("即将推出")
+                            .font(.zenCaption)
+                            .foregroundColor(.zenTertiary)
                     }
+                    .opacity(0.6)
                 }
             }
             .navigationTitle("设置")
