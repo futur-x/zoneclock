@@ -1,0 +1,363 @@
+# Zone Clock System Contract
+# 契约驱动开发(CDD) - 系统唯一真相源
+# Generated from Three Diagrams and One API Spec
+# Version: 1.0.0
+
+metadata:
+  version: "1.0.0"
+  name: "Zone Clock Contract"
+  description: "专注力管理助手系统契约 - 基于业务逻辑守恒原理"
+  generated: "2025-01-02"
+  methodology: "CDD - Contract Driven Development"
+
+# ==================== 命名规则 ====================
+naming:
+  # 核心实体命名
+  entities:
+    cycle: "Cycle"                    # 专注周期
+    microBreak: "MicroBreak"          # 微休息
+    longBreak: "LongBreak"            # 大休息
+    settings: "Settings"              # 用户设置
+    statistics: "Statistics"          # 统计数据
+
+  # 状态枚举命名
+  states:
+    cycle:
+      active: "active"                # 活跃专注
+      paused: "paused"                # 已暂停
+      completed: "completed"          # 已完成
+      stopped: "stopped"              # 已停止
+    app:
+      uninitialized: "uninitialized"  # 未初始化
+      ready: "ready"                  # 就绪
+      focusing: "focusing"            # 专注中
+      resting: "resting"              # 休息中
+
+  # UserDefaults键名
+  userDefaults:
+    focusDuration: "focusDuration"
+    breakDuration: "breakDuration"
+    soundType: "soundType"
+    dndEnabled: "dndEnabled"
+    notificationEnabled: "notificationEnabled"
+    onboardingCompleted: "onboardingCompleted"
+    currentCycleId: "currentCycleId"
+    lastSyncTime: "lastSyncTime"
+
+# ==================== 路径定义 ====================
+paths:
+  # 文件结构
+  project:
+    models: "zoneclock/Models/"
+    views: "zoneclock/Views/"
+    controllers: "zoneclock/Controllers/"
+    services: "zoneclock/Services/"
+    resources: "zoneclock/Resources/"
+    sounds: "zoneclock/Resources/Sounds/"
+
+  # 音效文件
+  sounds:
+    bell: "bell.mp3"
+    woodfish: "woodfish.mp3"
+    waterdrop: "waterdrop.mp3"
+
+  # 数据存储
+  storage:
+    documents: "Documents/"
+    coredata: "ZoneClock.sqlite"
+    icloud: "iCloud.zoneclock.container"
+
+# ==================== 时间规则 ====================
+timing:
+  # 专注时长配置（分钟）
+  focus:
+    min: 15
+    max: 180
+    default: 90
+
+  # 大休息时长配置（分钟）
+  break:
+    min: 5
+    max: 60
+    default: 20
+
+  # 微休息配置
+  microBreak:
+    duration: 10                     # 固定10秒
+    intervalMin: 120                  # 最小间隔2分钟（秒）
+    intervalMax: 300                  # 最大间隔5分钟（秒）
+    randomize: true                   # 随机触发
+
+  # 计时器精度
+  timer:
+    updateInterval: 1.0               # 1秒更新一次
+    precision: 0.1                    # 0.1秒精度
+
+# ==================== 通知配置 ====================
+notifications:
+  # 通知标识符
+  identifiers:
+    microBreak: "microBreakNotification"
+    cycleComplete: "cycleCompleteNotification"
+    breakComplete: "breakCompleteNotification"
+    reminder: "reminderNotification"
+
+  # 通知内容
+  content:
+    microBreak:
+      title: "微休息时间"
+      body: "放松10秒，保持专注力"
+      sound: "default"
+
+    cycleComplete:
+      title: "专注周期完成"
+      body: "太棒了！您完成了90分钟的专注"
+      sound: "celebration"
+
+    breakComplete:
+      title: "休息结束"
+      body: "准备好开始新的专注周期了吗？"
+      sound: "gentle"
+
+  # 通知权限
+  permissions:
+    alert: true
+    sound: true
+    badge: true
+
+# ==================== 数据格式 ====================
+formats:
+  # 日期时间格式
+  datetime:
+    iso8601: "yyyy-MM-dd'T'HH:mm:ss'Z'"
+    display: "yyyy-MM-dd HH:mm"
+
+  # UUID格式
+  uuid:
+    pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+
+  # 数据模型格式
+  models:
+    cycle:
+      required: ["cycleId", "status", "startTime", "duration"]
+      properties:
+        cycleId: "UUID"
+        status: "CycleStatus"
+        startTime: "Date"
+        endTime: "Date?"
+        duration: "Int"               # 分钟
+        actualDuration: "Int"         # 秒
+        pausedDuration: "Int"         # 秒
+        microBreaks: "Int"
+        completionRate: "Float"
+
+    settings:
+      required: ["focusDuration", "breakDuration"]
+      properties:
+        focusDuration: "Int"
+        breakDuration: "Int"
+        soundType: "SoundType"
+        dndEnabled: "Bool"
+        notificationEnabled: "Bool"
+        vibrationEnabled: "Bool"
+        theme: "Theme"
+
+# ==================== 状态转换规则 ====================
+transitions:
+  # 应用状态转换
+  appStates:
+    - from: "uninitialized"
+      to: "ready"
+      trigger: "onboardingComplete"
+
+    - from: "ready"
+      to: "focusing"
+      trigger: "startCycle"
+
+    - from: "focusing"
+      to: "resting"
+      trigger: "cycleComplete"
+
+    - from: "resting"
+      to: "ready"
+      trigger: "breakComplete"
+
+  # 周期状态转换
+  cycleStates:
+    - from: "active"
+      to: "paused"
+      trigger: "pauseCycle"
+
+    - from: "paused"
+      to: "active"
+      trigger: "resumeCycle"
+
+    - from: "active"
+      to: "completed"
+      trigger: "completeCycle"
+
+    - from: "active"
+      to: "stopped"
+      trigger: "stopCycle"
+
+# ==================== 业务规则 ====================
+rules:
+  # 核心业务规则
+  business:
+    - id: "BR001"
+      name: "单周期原则"
+      description: "同时只能有一个活跃的专注周期"
+      enforcement: "strict"
+
+    - id: "BR002"
+      name: "微休息随机性"
+      description: "微休息必须在2-5分钟随机触发"
+      enforcement: "strict"
+
+    - id: "BR003"
+      name: "微休息固定时长"
+      description: "微休息固定10秒，不可配置"
+      enforcement: "strict"
+
+    - id: "BR004"
+      name: "手动开始原则"
+      description: "新周期必须由用户手动开始"
+      enforcement: "strict"
+
+    - id: "BR005"
+      name: "暂停状态无微休息"
+      description: "暂停状态下不触发微休息"
+      enforcement: "strict"
+
+    - id: "BR006"
+      name: "勿扰模式静音"
+      description: "勿扰模式下屏蔽所有通知"
+      enforcement: "strict"
+
+  # 数据一致性规则
+  consistency:
+    - id: "CR001"
+      name: "状态守恒"
+      description: "专注时长 = 活跃时长 + 暂停时长 + 微休息时长"
+
+    - id: "CR002"
+      name: "版本冲突解决"
+      description: "数据冲突时保留最新版本"
+
+    - id: "CR003"
+      name: "本地优先"
+      description: "网络断开时优先使用本地数据"
+
+# ==================== API映射 ====================
+apiMappings:
+  # 用户动作到API的映射
+  actions:
+    startFocus:
+      method: "POST"
+      endpoint: "/api/cycles/start"
+      handler: "TimerController.startCycle"
+
+    pauseFocus:
+      method: "PUT"
+      endpoint: "/api/cycles/{id}/pause"
+      handler: "TimerController.pauseCycle"
+
+    resumeFocus:
+      method: "PUT"
+      endpoint: "/api/cycles/{id}/resume"
+      handler: "TimerController.resumeCycle"
+
+    triggerMicroBreak:
+      method: "POST"
+      endpoint: "/api/breaks/micro/trigger"
+      handler: "TimerController.triggerMicroBreak"
+
+    startLongBreak:
+      method: "POST"
+      endpoint: "/api/breaks/long/start"
+      handler: "TimerController.startLongBreak"
+
+    updateSettings:
+      method: "PUT"
+      endpoint: "/api/settings/*"
+      handler: "SettingsManager.updateSettings"
+
+    syncData:
+      method: "POST"
+      endpoint: "/api/sync/trigger"
+      handler: "SyncService.triggerSync"
+
+# ==================== 错误码定义 ====================
+errorCodes:
+  # 业务错误
+  business:
+    E1001: "已有活跃周期存在"
+    E1002: "周期状态不允许此操作"
+    E1003: "周期不存在"
+    E1004: "设置参数超出范围"
+    E1005: "音频文件格式不支持"
+
+  # 系统错误
+  system:
+    E2001: "通知权限被拒绝"
+    E2002: "存储空间不足"
+    E2003: "网络连接失败"
+    E2004: "iCloud同步失败"
+    E2005: "数据库操作失败"
+
+# ==================== 验证规则 ====================
+validation:
+  # 必须验证的关键配置
+  critical:
+    - field: "focusDuration"
+      rule: "range[15,180]"
+      message: "专注时长必须在15-180分钟之间"
+
+    - field: "breakDuration"
+      rule: "range[5,60]"
+      message: "休息时长必须在5-60分钟之间"
+
+    - field: "microBreakDuration"
+      rule: "equals[10]"
+      message: "微休息必须固定10秒"
+
+    - field: "microBreakInterval"
+      rule: "range[120,300]"
+      message: "微休息间隔必须在2-5分钟之间"
+
+  # 文件命名规范
+  fileNaming:
+    models: "^[A-Z][a-zA-Z]+\\.swift$"
+    views: "^[A-Z][a-zA-Z]+View\\.swift$"
+    controllers: "^[A-Z][a-zA-Z]+Controller\\.swift$"
+    services: "^[A-Z][a-zA-Z]+Service\\.swift$"
+
+# ==================== 守恒原理验证 ====================
+conservation:
+  # 业务逻辑守恒
+  businessLogic:
+    formula: "Info(UserJourney) = Info(SequenceDiagram) = Info(StateDiagram) = Info(APISpec)"
+    verified: true
+
+  # 状态守恒
+  stateConservation:
+    - name: "专注时长守恒"
+      formula: "TotalFocusTime = ActiveTime + PausedTime + MicroBreakTime"
+
+    - name: "休息时长守恒"
+      formula: "TotalBreakTime = MicroBreaks * 10s + LongBreakTime"
+
+    - name: "数据一致性守恒"
+      formula: "LocalState + SyncDiff = CloudState"
+
+# ==================== 契约版本管理 ====================
+versioning:
+  current: "1.0.0"
+  compatibility: ">=1.0.0"
+  changelog:
+    - version: "1.0.0"
+      date: "2025-01-02"
+      changes:
+        - "初始契约定义"
+        - "基于三图一端文档生成"
+        - "实现业务逻辑守恒原理"

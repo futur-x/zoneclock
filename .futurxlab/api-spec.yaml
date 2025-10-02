@@ -1,0 +1,904 @@
+openapi: 3.0.3
+info:
+  title: Zone Clock API
+  description: 专注力管理助手API规范 - 基于业务逻辑守恒原理设计
+  version: 1.0.1
+  contact:
+    name: FuturX Development Team
+    email: dev@futurx.lab
+
+servers:
+  - url: https://api.zoneclock.app/v1
+    description: Production server
+  - url: http://localhost:8080/v1
+    description: Development server
+
+tags:
+  - name: Users
+    description: 用户管理相关接口
+  - name: Cycles
+    description: 专注周期管理
+  - name: Breaks
+    description: 休息管理（微休息和大休息）
+  - name: Settings
+    description: 用户设置配置
+  - name: Statistics
+    description: 数据统计与分析
+  - name: Sync
+    description: 数据同步服务
+
+paths:
+  # ===== Users APIs =====
+  /api/users/onboarding:
+    post:
+      tags: [Users]
+      summary: 完成新用户引导
+      description: 记录用户完成引导流程，设置初始偏好
+      operationId: completeOnboarding
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - notificationEnabled
+                - defaultFocusDuration
+                - defaultBreakDuration
+              properties:
+                notificationEnabled:
+                  type: boolean
+                  description: 是否允许通知
+                defaultFocusDuration:
+                  type: integer
+                  minimum: 15
+                  maximum: 180
+                  default: 90
+                  description: 默认专注时长（分钟）
+                defaultBreakDuration:
+                  type: integer
+                  minimum: 5
+                  maximum: 60
+                  default: 20
+                  description: 默认休息时长（分钟）
+                soundPreference:
+                  type: string
+                  enum: [bell, woodfish, waterdrop, custom]
+                  default: bell
+      responses:
+        '201':
+          description: 引导完成
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  # ===== Cycles APIs =====
+  /api/cycles/start:
+    post:
+      tags: [Cycles]
+      summary: 开始新的专注周期
+      description: 创建并启动一个新的专注周期（对应 #REF-UJ-1）
+      operationId: startCycle
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                duration:
+                  type: integer
+                  description: 自定义专注时长（分钟），不提供则使用用户设置
+                  minimum: 15
+                  maximum: 180
+      responses:
+        '201':
+          description: 周期已创建并开始
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cycle'
+        '409':
+          description: 已有活跃周期存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/cycles/{id}/pause:
+    put:
+      tags: [Cycles]
+      summary: 暂停当前周期
+      description: 暂停正在进行的专注周期（对应 #REF-UJ-3）
+      operationId: pauseCycle
+      parameters:
+        - $ref: '#/components/parameters/CycleId'
+      responses:
+        '200':
+          description: 周期已暂停
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cycle'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: 周期状态不允许暂停
+
+  /api/cycles/{id}/resume:
+    put:
+      tags: [Cycles]
+      summary: 恢复暂停的周期
+      description: 恢复已暂停的专注周期（对应 #REF-UJ-3）
+      operationId: resumeCycle
+      parameters:
+        - $ref: '#/components/parameters/CycleId'
+      responses:
+        '200':
+          description: 周期已恢复
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cycle'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: 周期状态不允许恢复
+
+  /api/cycles/{id}/stop:
+    put:
+      tags: [Cycles]
+      summary: 停止当前周期
+      description: 提前结束专注周期
+      operationId: stopCycle
+      parameters:
+        - $ref: '#/components/parameters/CycleId'
+      responses:
+        '200':
+          description: 周期已停止
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cycle'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ===== Breaks APIs =====
+  /api/breaks/micro/trigger:
+    post:
+      tags: [Breaks]
+      summary: 触发微休息
+      description: 系统自动触发的微休息提醒（对应 #REF-UJ-2）
+      operationId: triggerMicroBreak
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - cycleId
+                - triggerTime
+              properties:
+                cycleId:
+                  type: string
+                  format: uuid
+                  description: 所属周期ID
+                triggerTime:
+                  type: string
+                  format: date-time
+                  description: 触发时间
+                nextBreakIn:
+                  type: integer
+                  description: 下次微休息间隔（秒）
+                  minimum: 120
+                  maximum: 300
+      responses:
+        '201':
+          description: 微休息已记录
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MicroBreak'
+        '404':
+          description: 周期不存在
+
+  /api/breaks/long/start:
+    post:
+      tags: [Breaks]
+      summary: 开始大休息
+      description: 专注周期完成后进入大休息（对应 #REF-UJ-4）
+      operationId: startLongBreak
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - cycleId
+              properties:
+                cycleId:
+                  type: string
+                  format: uuid
+                  description: 完成的周期ID
+                duration:
+                  type: integer
+                  description: 休息时长（分钟），不提供则使用默认设置
+                  minimum: 5
+                  maximum: 60
+      responses:
+        '201':
+          description: 大休息已开始
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LongBreak'
+        '409':
+          description: 周期未完成或已有休息进行中
+
+  # ===== Settings APIs =====
+  /api/settings:
+    get:
+      tags: [Settings]
+      summary: 获取用户设置
+      description: 获取当前用户的所有配置项（对应 #REF-UJ-5）
+      operationId: getSettings
+      responses:
+        '200':
+          description: 用户设置
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settings'
+
+    put:
+      tags: [Settings]
+      summary: 批量更新设置
+      description: 批量更新用户设置
+      operationId: updateSettings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Settings'
+      responses:
+        '200':
+          description: 设置已更新
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settings'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/settings/focus-duration:
+    put:
+      tags: [Settings]
+      summary: 更新专注时长
+      description: 修改默认专注周期时长
+      operationId: updateFocusDuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - duration
+              properties:
+                duration:
+                  type: integer
+                  minimum: 15
+                  maximum: 180
+                  description: 专注时长（分钟）
+      responses:
+        '200':
+          description: 设置已更新
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  duration:
+                    type: integer
+                  effectiveFrom:
+                    type: string
+                    description: 生效时间（下个周期）
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/settings/break-duration:
+    put:
+      tags: [Settings]
+      summary: 更新休息时长
+      description: 修改大休息时长
+      operationId: updateBreakDuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - duration
+              properties:
+                duration:
+                  type: integer
+                  minimum: 5
+                  maximum: 60
+                  description: 休息时长（分钟）
+      responses:
+        '200':
+          description: 设置已更新
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/settings/sounds:
+    put:
+      tags: [Settings]
+      summary: 更新提示音设置
+      description: 配置提示音偏好
+      operationId: updateSoundSettings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - soundType
+              properties:
+                soundType:
+                  type: string
+                  enum: [bell, woodfish, waterdrop, custom]
+                customSoundUrl:
+                  type: string
+                  format: uri
+                  description: 自定义音效URL（当soundType为custom时必需）
+                volume:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                  default: 0.7
+                vibrationEnabled:
+                  type: boolean
+                  description: 是否启用振动（仅iOS）
+      responses:
+        '200':
+          description: 音效设置已更新
+        '400':
+          description: 音频文件格式不支持或URL无效
+
+  /api/settings/sounds/upload:
+    post:
+      tags: [Settings]
+      summary: 上传自定义音效
+      description: 上传用户自定义提示音文件
+      operationId: uploadCustomSound
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - soundFile
+              properties:
+                soundFile:
+                  type: string
+                  format: binary
+                  description: 音频文件（mp3, wav, aiff, m4a）
+      responses:
+        '201':
+          description: 音效上传成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  soundId:
+                    type: string
+                  url:
+                    type: string
+                    format: uri
+        '400':
+          description: 文件格式不支持
+        '413':
+          description: 文件过大
+
+  /api/settings/dnd:
+    put:
+      tags: [Settings]
+      summary: 切换勿扰模式
+      description: 开启或关闭勿扰模式
+      operationId: toggleDND
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - enabled
+              properties:
+                enabled:
+                  type: boolean
+                  description: true开启勿扰，false关闭
+      responses:
+        '200':
+          description: 勿扰模式已更新
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dndEnabled:
+                    type: boolean
+                  updatedAt:
+                    type: string
+                    format: date-time
+
+  # ===== Statistics APIs =====
+  /api/statistics/today:
+    get:
+      tags: [Statistics]
+      summary: 获取今日统计
+      description: 获取当日的专注统计数据（对应 #REF-UJ-6）
+      operationId: getTodayStatistics
+      responses:
+        '200':
+          description: 今日统计数据
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyStatistics'
+
+  /api/statistics/history:
+    get:
+      tags: [Statistics]
+      summary: 获取历史记录
+      description: 获取过去30天的专注历史
+      operationId: getHistoryStatistics
+      parameters:
+        - name: days
+          in: query
+          description: 查询天数
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 30
+            default: 30
+      responses:
+        '200':
+          description: 历史统计数据
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DailyStatistics'
+
+  /api/statistics/trends:
+    get:
+      tags: [Statistics]
+      summary: 获取趋势分析
+      description: 分析专注习惯趋势
+      operationId: getTrendAnalysis
+      responses:
+        '200':
+          description: 趋势分析数据
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrendAnalysis'
+
+  /api/statistics/cycle/{id}:
+    get:
+      tags: [Statistics]
+      summary: 获取单个周期统计
+      description: 获取特定周期的详细统计
+      operationId: getCycleStatistics
+      parameters:
+        - $ref: '#/components/parameters/CycleId'
+      responses:
+        '200':
+          description: 周期统计数据
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CycleStatistics'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ===== Sync APIs =====
+  /api/sync/trigger:
+    post:
+      tags: [Sync]
+      summary: 触发数据同步
+      description: 手动触发与iCloud的数据同步（对应 #REF-UJ-7）
+      operationId: triggerSync
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                forceSync:
+                  type: boolean
+                  default: false
+                  description: 是否强制同步（忽略版本检查）
+      responses:
+        '200':
+          description: 同步已触发
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncResult'
+        '202':
+          description: 同步已加入队列（无网络时）
+        '409':
+          description: 同步冲突需要解决
+
+  /api/sync/status:
+    get:
+      tags: [Sync]
+      summary: 获取同步状态
+      description: 查询当前同步状态
+      operationId: getSyncStatus
+      responses:
+        '200':
+          description: 同步状态信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncStatus'
+
+components:
+  parameters:
+    CycleId:
+      name: id
+      in: path
+      required: true
+      description: 专注周期ID
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    User:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        settings:
+          $ref: '#/components/schemas/Settings'
+        onboardingCompleted:
+          type: boolean
+
+    Cycle:
+      type: object
+      required:
+        - cycleId
+        - status
+        - startTime
+        - duration
+      properties:
+        cycleId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [active, paused, completed, stopped]
+          description: 周期状态
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+          nullable: true
+        duration:
+          type: integer
+          description: 计划时长（分钟）
+        actualDuration:
+          type: integer
+          description: 实际专注时长（秒）
+        pausedDuration:
+          type: integer
+          description: 暂停总时长（秒）
+        microBreaks:
+          type: integer
+          description: 微休息次数
+        completionRate:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: 完成率
+
+    MicroBreak:
+      type: object
+      properties:
+        breakId:
+          type: string
+          format: uuid
+        cycleId:
+          type: string
+          format: uuid
+        triggerTime:
+          type: string
+          format: date-time
+        duration:
+          type: integer
+          default: 10
+          description: 微休息时长（秒）
+        breakCount:
+          type: integer
+          description: 本周期第几次微休息
+        nextBreakIn:
+          type: integer
+          nullable: true
+          description: 下次微休息间隔（秒）
+
+    LongBreak:
+      type: object
+      properties:
+        breakId:
+          type: string
+          format: uuid
+        cycleId:
+          type: string
+          format: uuid
+        startTime:
+          type: string
+          format: date-time
+        duration:
+          type: integer
+          description: 休息时长（分钟）
+        status:
+          type: string
+          enum: [active, completed, skipped]
+
+    Settings:
+      type: object
+      properties:
+        focusDuration:
+          type: integer
+          minimum: 15
+          maximum: 180
+          default: 90
+          description: 专注时长（分钟）
+        breakDuration:
+          type: integer
+          minimum: 5
+          maximum: 60
+          default: 20
+          description: 休息时长（分钟）
+        microBreakInterval:
+          type: object
+          properties:
+            min:
+              type: integer
+              default: 120
+              description: 最小间隔（秒）
+            max:
+              type: integer
+              default: 300
+              description: 最大间隔（秒）
+        soundSettings:
+          type: object
+          properties:
+            soundType:
+              type: string
+              enum: [bell, woodfish, waterdrop, custom]
+            customSoundUrl:
+              type: string
+              format: uri
+              nullable: true
+            volume:
+              type: number
+              minimum: 0
+              maximum: 1
+            vibrationEnabled:
+              type: boolean
+        dndEnabled:
+          type: boolean
+          default: false
+          description: 勿扰模式状态
+        theme:
+          type: string
+          enum: [light, dark, auto]
+          default: auto
+
+    DailyStatistics:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        totalCycles:
+          type: integer
+          description: 总周期数
+        completedCycles:
+          type: integer
+          description: 完成的周期数
+        totalFocusTime:
+          type: integer
+          description: 总专注时长（分钟）
+        totalBreakTime:
+          type: integer
+          description: 总休息时长（分钟）
+        microBreaksCount:
+          type: integer
+          description: 微休息总次数
+        completionRate:
+          type: number
+          format: float
+          description: 完成率
+        averageFocusDuration:
+          type: integer
+          description: 平均专注时长（分钟）
+
+    CycleStatistics:
+      type: object
+      properties:
+        cycleId:
+          type: string
+          format: uuid
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        plannedDuration:
+          type: integer
+        actualFocusTime:
+          type: integer
+        pausedTime:
+          type: integer
+        microBreaks:
+          type: array
+          items:
+            type: object
+            properties:
+              time:
+                type: string
+                format: date-time
+              intervalSinceLastBreak:
+                type: integer
+        completionRate:
+          type: number
+          format: float
+
+    TrendAnalysis:
+      type: object
+      properties:
+        period:
+          type: string
+          description: 分析周期
+        averageDailyFocusTime:
+          type: integer
+          description: 平均每日专注时长（分钟）
+        averageCompletionRate:
+          type: number
+          format: float
+        peakFocusHours:
+          type: array
+          items:
+            type: integer
+            minimum: 0
+            maximum: 23
+          description: 高峰专注时段
+        weeklyPattern:
+          type: object
+          additionalProperties:
+            type: integer
+          description: 每周专注模式
+        improvement:
+          type: number
+          format: float
+          description: 相比上期提升率
+
+    SyncResult:
+      type: object
+      properties:
+        syncStatus:
+          type: string
+          enum: [success, pending, conflict, failed]
+        syncedAt:
+          type: string
+          format: date-time
+        itemsSynced:
+          type: integer
+        conflicts:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              localVersion:
+                type: string
+              remoteVersion:
+                type: string
+              resolution:
+                type: string
+                enum: [keep_local, keep_remote, merged]
+
+    SyncStatus:
+      type: object
+      properties:
+        lastSyncAt:
+          type: string
+          format: date-time
+        nextSyncAt:
+          type: string
+          format: date-time
+        pendingChanges:
+          type: integer
+        syncEnabled:
+          type: boolean
+        connectionStatus:
+          type: string
+          enum: [online, offline, syncing]
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+
+  responses:
+    BadRequest:
+      description: 请求参数错误
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: 资源不存在
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Conflict:
+      description: 资源冲突
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []
