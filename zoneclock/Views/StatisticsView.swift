@@ -22,7 +22,7 @@ struct StatisticsView: View {
                 // 标签选择器
                 Picker("统计类型", selection: $selectedTab) {
                     Text("今日").tag(0)
-                    Text("本周").tag(1)
+                    Text("过去7天").tag(1)
                     Text("趋势").tag(2)
                 }
                 .pickerStyle(SegmentedPickerStyle())
@@ -146,9 +146,9 @@ struct StatisticsView: View {
     // MARK: - Week Statistics
     private var weekStatisticsView: some View {
         VStack(spacing: 20) {
-            // 本周专注时长图表
+            // 过去7天专注时长图表
             VStack(alignment: .leading, spacing: 12) {
-                Text("本周专注时长")
+                Text("过去7天专注时长")
                     .font(.headline)
 
                 // 简单的柱状图
@@ -176,10 +176,10 @@ struct StatisticsView: View {
             }
             .padding(.horizontal)
 
-            // 本周总结
+            // 过去7天总结
             VStack(spacing: 16) {
                 HStack {
-                    Text("本周总计")
+                    Text("7天总计")
                         .font(.headline)
                     Spacer()
                     Text("\(weekData.reduce(0, +)) 分钟")
@@ -278,8 +278,22 @@ struct StatisticsView: View {
     }
 
     private func weekDayLabel(_ index: Int) -> String {
-        let days = ["一", "二", "三", "四", "五", "六", "日"]
-        return days[index]
+        // 从今天往前推index天
+        let calendar = Calendar.current
+        guard let date = calendar.date(byAdding: .day, value: -(6 - index), to: Date()) else {
+            return ""
+        }
+
+        // 格式化为"周X"或"今天"
+        if calendar.isDateInToday(date) {
+            return "今天"
+        } else if calendar.isDateInYesterday(date) {
+            return "昨天"
+        } else {
+            let weekday = calendar.component(.weekday, from: date)
+            let days = ["日", "一", "二", "三", "四", "五", "六"]
+            return "周\(days[weekday - 1])"
+        }
     }
 }
 

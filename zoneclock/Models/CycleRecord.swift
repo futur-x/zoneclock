@@ -100,7 +100,7 @@ class DataStore {
         return calculateStatistics(from: records)
     }
 
-    /// 获取本周统计（过去7天）
+    /// 获取过去7天统计（从7天前到今天）
     func getWeekStatistics() -> [DailyStatistics] {
         var weekStats: [DailyStatistics] = []
         let calendar = Calendar.current
@@ -113,10 +113,10 @@ class DataStore {
                 calendar.isDate(record.date, inSameDayAs: startOfDay)
             }
 
-            weekStats.append(calculateStatistics(from: records))
+            weekStats.append(calculateStatistics(from: records, date: startOfDay))
         }
 
-        return weekStats.reversed() // 从最早到最新
+        return weekStats.reversed() // 从7天前到今天（index 0 = 7天前, index 6 = 今天）
     }
 
     /// 获取指定日期范围的统计
@@ -131,7 +131,7 @@ class DataStore {
     // MARK: - Private Methods
 
     /// 从记录计算统计数据
-    private func calculateStatistics(from records: [CycleRecord]) -> DailyStatistics {
+    private func calculateStatistics(from records: [CycleRecord], date: Date = Date()) -> DailyStatistics {
         let totalFocusTime = records.reduce(0) { $0 + ($1.actualDuration / 60) } // 转换为分钟
         let completedCycles = records.filter { $0.wasCompleted }.count
         let totalCycles = records.count
@@ -150,6 +150,7 @@ class DataStore {
         let totalBreakTime = completedCycles * 20
 
         return DailyStatistics(
+            date: date,
             totalFocusTime: totalFocusTime,
             completedCycles: completedCycles,
             microBreaksCount: microBreaksCount,
