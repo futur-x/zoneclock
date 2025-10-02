@@ -51,7 +51,7 @@ struct SettingsView: View {
                             Text(sound.displayName).tag(sound)
                         }
                     }
-                    .onChange(of: settings.soundSettings.soundType) { newValue in
+                    .onChange(of: settings.soundSettings.soundType) { _, newValue in
                         print("🔄 Sound type changed to: \(newValue.displayName) (\(newValue.fileName))")
                         settings.save()
                     }

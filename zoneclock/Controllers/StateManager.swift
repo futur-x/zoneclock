@@ -110,6 +110,12 @@ class StateManager: ObservableObject {
 
         cycle.stop()
         currentCycle = cycle
+
+        // 保存周期记录（即使是停止的）
+        let record = CycleRecord(fromCycle: cycle)
+        DataStore.shared.saveCycleRecord(record)
+        print("⏹️ Cycle stopped and saved: \(record.actualDuration)s")
+
         transitionTo(.ready)
 
         // 清除当前周期ID
@@ -128,6 +134,11 @@ class StateManager: ObservableObject {
         // 完成周期
         cycle.complete()
         currentCycle = cycle
+
+        // 保存周期记录到数据存储
+        let record = CycleRecord(fromCycle: cycle)
+        DataStore.shared.saveCycleRecord(record)
+        print("✅ Cycle completed and saved: \(record.actualDuration)s")
 
         // 开始大休息
         let longBreak = LongBreak(cycleId: cycle.cycleId, duration: settings.breakDuration)

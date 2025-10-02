@@ -12,6 +12,7 @@ import SwiftUI
 struct CompactStatisticsView: View {
     @State private var selectedTab = 0
     @State private var todayStats = DailyStatistics()
+    @State private var weekStats: [DailyStatistics] = []
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
@@ -64,6 +65,17 @@ struct CompactStatisticsView: View {
             }
         }
         .frame(width: 500, height: 600)
+        .onAppear {
+            loadStatistics()
+        }
+    }
+
+    // MARK: - Load Data
+
+    private func loadStatistics() {
+        todayStats = DataStore.shared.getTodayStatistics()
+        weekStats = DataStore.shared.getWeekStatistics()
+        print("📊 Loaded statistics - Today: \(todayStats.totalFocusTime)min")
     }
 
     // MARK: - Today Statistics
@@ -146,15 +158,15 @@ struct CompactStatisticsView: View {
 
                 // 简单的柱状图
                 HStack(alignment: .bottom, spacing: 12) {
-                    ForEach(0..<7) { day in
+                    ForEach(0..<min(7, weekData.count), id: \.self) { day in
                         VStack(spacing: 4) {
-                            Text("\(mockWeekData[day])")
+                            Text("\(weekData[day])")
                                 .font(.caption2)
                                 .foregroundColor(.secondary)
 
                             RoundedRectangle(cornerRadius: 4)
                                 .fill(Color.blue.opacity(0.7))
-                                .frame(width: 50, height: CGFloat(mockWeekData[day]) * 1.8)
+                                .frame(width: 50, height: max(4, CGFloat(weekData[day]) * 1.8))
 
                             Text(weekDayLabel(day))
                                 .font(.caption)
@@ -176,7 +188,7 @@ struct CompactStatisticsView: View {
                     Text("本周总计")
                         .font(.headline)
                     Spacer()
-                    Text("\(mockWeekData.reduce(0, +)) 分钟")
+                    Text("\(weekData.reduce(0, +)) 分钟")
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.blue)
@@ -185,14 +197,15 @@ struct CompactStatisticsView: View {
                 HStack {
                     Text("日均专注")
                     Spacer()
-                    Text("\(mockWeekData.reduce(0, +) / 7) 分钟")
+                    let avg = weekData.isEmpty ? 0 : weekData.reduce(0, +) / weekData.count
+                    Text("\(avg) 分钟")
                         .foregroundColor(.secondary)
                 }
 
                 HStack {
                     Text("最高记录")
                     Spacer()
-                    Text("\(mockWeekData.max() ?? 0) 分钟")
+                    Text("\(weekData.max() ?? 0) 分钟")
                         .foregroundColor(.green)
                 }
             }
@@ -264,8 +277,8 @@ struct CompactStatisticsView: View {
     }
 
     // MARK: - Helper Data
-    private var mockWeekData: [Int] {
-        [75, 90, 60, 120, 90, 45, 80]
+    private var weekData: [Int] {
+        return weekStats.map { $0.totalFocusTime }
     }
 
     private var peakHours: [(Int, Double)] {

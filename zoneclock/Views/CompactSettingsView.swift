@@ -97,7 +97,7 @@ struct CompactSettingsView: View {
                                     }
                                 }
                                 .labelsHidden()
-                                .onChange(of: settings.soundSettings.soundType) { newValue in
+                                .onChange(of: settings.soundSettings.soundType) { _, newValue in
                                     print("🔄 Sound type changed to: \(newValue.displayName) (\(newValue.fileName))")
                                     settings.save()
                                 }
