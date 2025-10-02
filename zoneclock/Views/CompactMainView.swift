@@ -25,15 +25,15 @@ struct CompactMainView: View {
                     .frame(width: 8, height: 8)
 
                 Text(statusText)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    .font(.zenCaption)
+                    .foregroundColor(.zenSecondary)
 
                 Spacer()
 
                 if stateManager.isDNDEnabled {
                     Image(systemName: "moon.fill")
-                        .font(.caption)
-                        .foregroundColor(.purple)
+                        .font(.zenCaption)
+                        .foregroundColor(.zenAccent)
                 }
             }
             .padding(.horizontal)
@@ -43,37 +43,37 @@ struct CompactMainView: View {
                 // 微休息模式
                 VStack(spacing: 8) {
                     Text("微休息")
-                        .font(.caption)
-                        .foregroundColor(.orange)
+                        .font(.zenCaption)
+                        .foregroundColor(.zenSecondary)
 
                     Text("\(timerController.getMicroBreakCountdown())")
-                        .font(.system(size: 48, weight: .bold, design: .rounded))
-                        .foregroundColor(.orange)
+                        .font(.zenNumber)
+                        .foregroundColor(.zenPrimary)
 
                     Text("秒")
-                        .font(.caption)
-                        .foregroundColor(.orange.opacity(0.8))
+                        .font(.zenCaption)
+                        .foregroundColor(.zenTertiary)
                 }
                 .padding(.vertical, 8)
             } else {
                 // 普通计时模式
                 VStack(spacing: 4) {
                     Text(phaseTitle)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        .font(.zenCaption)
+                        .foregroundColor(.zenSecondary)
 
                     Text(timerController.formattedRemainingTime())
-                        .font(.system(size: 48, weight: .bold, design: .rounded))
-                        .foregroundColor(.primary)
+                        .font(.zenNumber)
+                        .foregroundColor(.zenPrimary)
 
                     if timerController.currentPhase == .focusing {
                         HStack(spacing: 4) {
-                            Image(systemName: "flame.fill")
-                                .font(.system(size: 8))
-                                .foregroundColor(.orange)
+                            Image(systemName: "circle.fill")
+                                .font(.system(size: 6))
+                                .foregroundColor(.zenTertiary)
                             Text("已专注 \(timerController.formattedElapsedTime())")
-                                .font(.system(size: 10))
-                                .foregroundColor(.secondary)
+                                .font(.zenCaption)
+                                .foregroundColor(.zenSecondary)
                         }
                     }
                 }
@@ -83,14 +83,14 @@ struct CompactMainView: View {
             // 进度环（小尺寸）
             ZStack {
                 Circle()
-                    .stroke(Color.gray.opacity(0.2), lineWidth: 8)
+                    .stroke(Color.zenProgressBackground, lineWidth: 6)
                     .frame(width: 120, height: 120)
 
                 Circle()
                     .trim(from: 0, to: CGFloat(timerController.getProgress()))
                     .stroke(
-                        progressColor,
-                        style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                        Color.zenProgress,
+                        style: StrokeStyle(lineWidth: 6, lineCap: .round)
                     )
                     .frame(width: 120, height: 120)
                     .rotationEffect(Angle(degrees: -90))
@@ -99,11 +99,12 @@ struct CompactMainView: View {
                 if let cycle = stateManager.currentCycle {
                     VStack(spacing: 4) {
                         Text("第 \(cycle.microBreaks + 1) 轮")
-                            .font(.system(size: 9))
-                            .foregroundColor(.secondary)
+                            .font(.zenCaption)
+                            .foregroundColor(.zenTertiary)
 
                         Text("\(Int(cycle.completionRate * 100))%")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.zenNumberSmall)
+                            .foregroundColor(.zenPrimary)
                     }
                 }
             }
@@ -115,9 +116,9 @@ struct CompactMainView: View {
                     Button(action: startFocus) {
                         Image(systemName: "play.fill")
                             .font(.title3)
-                            .foregroundColor(.white)
+                            .foregroundColor(.zenBackground)
                             .frame(width: 50, height: 50)
-                            .background(Color.blue)
+                            .background(Color.zenAccent)
                             .clipShape(Circle())
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -127,9 +128,9 @@ struct CompactMainView: View {
                             Button(action: pauseFocus) {
                                 Image(systemName: "pause.fill")
                                     .font(.title3)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.zenBackground)
                                     .frame(width: 44, height: 44)
-                                    .background(Color.orange)
+                                    .background(Color.zenAccent)
                                     .clipShape(Circle())
                             }
                             .buttonStyle(PlainButtonStyle())
@@ -137,9 +138,9 @@ struct CompactMainView: View {
                             Button(action: resumeFocus) {
                                 Image(systemName: "play.fill")
                                     .font(.title3)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.zenBackground)
                                     .frame(width: 44, height: 44)
-                                    .background(Color.green)
+                                    .background(Color.zenAccent)
                                     .clipShape(Circle())
                             }
                             .buttonStyle(PlainButtonStyle())
@@ -148,9 +149,9 @@ struct CompactMainView: View {
                         Button(action: stopFocus) {
                             Image(systemName: "stop.fill")
                                 .font(.title3)
-                                .foregroundColor(.white)
+                                .foregroundColor(.zenBackground)
                                 .frame(width: 44, height: 44)
-                                .background(Color.red)
+                                .background(Color.zenPrimary)
                                 .clipShape(Circle())
                         }
                         .buttonStyle(PlainButtonStyle())
@@ -159,9 +160,9 @@ struct CompactMainView: View {
                     Button(action: skipBreak) {
                         Image(systemName: "forward.fill")
                             .font(.title3)
-                            .foregroundColor(.white)
+                            .foregroundColor(.zenBackground)
                             .frame(width: 50, height: 50)
-                            .background(Color.purple)
+                            .background(Color.zenAccent)
                             .clipShape(Circle())
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -177,33 +178,33 @@ struct CompactMainView: View {
                 Button(action: { showStatistics = true }) {
                     VStack(spacing: 2) {
                         Image(systemName: "chart.bar.fill")
-                            .font(.caption)
+                            .font(.zenCaption)
                         Text("统计")
-                            .font(.system(size: 9))
+                            .font(.zenCaption)
                     }
-                    .foregroundColor(.primary)
+                    .foregroundColor(.zenPrimary)
                 }
                 .buttonStyle(PlainButtonStyle())
 
                 Button(action: { showSettings = true }) {
                     VStack(spacing: 2) {
                         Image(systemName: "gearshape.fill")
-                            .font(.caption)
+                            .font(.zenCaption)
                         Text("设置")
-                            .font(.system(size: 9))
+                            .font(.zenCaption)
                     }
-                    .foregroundColor(.primary)
+                    .foregroundColor(.zenPrimary)
                 }
                 .buttonStyle(PlainButtonStyle())
 
                 Button(action: toggleDND) {
                     VStack(spacing: 2) {
                         Image(systemName: stateManager.isDNDEnabled ? "moon.fill" : "moon")
-                            .font(.caption)
+                            .font(.zenCaption)
                         Text("勿扰")
-                            .font(.system(size: 9))
+                            .font(.zenCaption)
                     }
-                    .foregroundColor(stateManager.isDNDEnabled ? .purple : .primary)
+                    .foregroundColor(stateManager.isDNDEnabled ? .zenAccent : .zenPrimary)
                 }
                 .buttonStyle(PlainButtonStyle())
             }
@@ -259,16 +260,16 @@ struct CompactMainView: View {
     private var statusColor: Color {
         switch stateManager.currentState {
         case .uninitialized:
-            return .gray
+            return .zenDisabled
         case .ready:
-            return .green
+            return .zenSecondary
         case .focusing:
             if timerController.currentPhase == .microBreak {
-                return .orange
+                return .zenTertiary
             }
-            return stateManager.currentCycle?.status == .paused ? .yellow : .blue
+            return stateManager.currentCycle?.status == .paused ? .zenDisabled : .zenAccent
         case .resting:
-            return .purple
+            return .zenPrimary
         }
     }
 
@@ -285,27 +286,8 @@ struct CompactMainView: View {
         }
     }
 
-    private var progressColor: LinearGradient {
-        switch timerController.currentPhase {
-        case .focusing:
-            return LinearGradient(
-                gradient: Gradient(colors: [Color.blue, Color.purple]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        case .longBreak:
-            return LinearGradient(
-                gradient: Gradient(colors: [Color.purple, Color.pink]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        default:
-            return LinearGradient(
-                gradient: Gradient(colors: [Color.orange, Color.red]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        }
+    private var progressColor: Color {
+        return .zenProgress
     }
 
     // MARK: - Actions
