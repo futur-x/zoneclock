@@ -287,8 +287,15 @@ class TimerController: ObservableObject {
 
     /// 获取进度（0.0 - 1.0）
     func getProgress() -> Float {
+        // 优先使用 Cycle 的 completionRate（它会正确处理暂停时间）
+        if currentPhase == .focusing, let cycle = stateManager?.currentCycle {
+            return cycle.completionRate
+        }
+
+        // 大休息阶段使用 elapsedTime 计算
         guard let totalDuration = getTotalDuration() else { return 0 }
-        return Float(elapsedTime) / Float(totalDuration)
+        let progress = Float(elapsedTime) / Float(totalDuration)
+        return min(1.0, progress)
     }
 
     /// 获取总时长（秒）
