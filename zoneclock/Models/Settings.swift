@@ -8,20 +8,22 @@
 
 import Foundation
 
-/// 音效类型
+/// 音效类型 - 微休息声音
 enum SoundType: String, Codable, CaseIterable {
-    case bell = "bell"
-    case woodfish = "woodfish"
-    case waterdrop = "waterdrop"
-    case custom = "custom"
+    case bell = "dingling"          // 钵声
+    case woodfish = "muyu"           // 木鱼声
+    case waterdrop = "shuidi"        // 水滴声
 
     var displayName: String {
         switch self {
         case .bell: return "钵声"
         case .woodfish: return "木鱼声"
         case .waterdrop: return "水滴声"
-        case .custom: return "自定义"
         }
+    }
+
+    var fileName: String {
+        return self.rawValue
     }
 }
 
@@ -42,8 +44,7 @@ enum Theme: String, Codable, CaseIterable {
 
 /// 音效设置
 struct SoundSettings: Codable {
-    var soundType: SoundType = .bell
-    var customSoundUrl: URL?
+    var soundType: SoundType = .bell        // 微休息声音
     var volume: Float = 0.7
     var vibrationEnabled: Bool = true
 }

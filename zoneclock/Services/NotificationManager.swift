@@ -60,7 +60,17 @@ class NotificationManager: NSObject, NotificationService {
 
     /// 发送微休息通知
     func sendMicroBreakNotification() {
-        guard !isDNDEnabled else { return }
+        print("📢 sendMicroBreakNotification called")
+        print("🔇 DND enabled: \(isDNDEnabled)")
+
+        guard !isDNDEnabled else {
+            print("❌ Micro break notification blocked by DND")
+            return
+        }
+
+        print("🔊 Playing micro break sound...")
+        // 播放微休息声音
+        AudioPlayer.shared.playMicroBreakSound()
 
         let content = UNMutableNotificationContent()
         content.title = "微休息时间"
@@ -70,9 +80,12 @@ class NotificationManager: NSObject, NotificationService {
 
         // 添加振动（iOS）
         #if os(iOS)
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        if Settings.load().soundSettings.vibrationEnabled {
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        }
         #endif
 
+        print("📤 Sending notification...")
         sendNotification(content: content, identifier: "microBreak")
     }
 
@@ -80,15 +93,20 @@ class NotificationManager: NSObject, NotificationService {
     func sendCycleCompleteNotification() {
         guard !isDNDEnabled else { return }
 
+        // 播放周期完成声音（西藏钵）
+        AudioPlayer.shared.playCycleCompleteSound()
+
         let content = UNMutableNotificationContent()
         content.title = "专注周期完成"
         content.body = "太棒了！您完成了90分钟的专注"
-        content.sound = UNNotificationSound(named: UNNotificationSoundName("celebration.mp3"))
+        content.sound = .default
         content.categoryIdentifier = "cycleCompleteNotification"
 
         // 添加振动（iOS）
         #if os(iOS)
-        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        if Settings.load().soundSettings.vibrationEnabled {
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        }
         #endif
 
         sendNotification(content: content, identifier: "cycleComplete")
@@ -98,10 +116,13 @@ class NotificationManager: NSObject, NotificationService {
     func sendBreakCompleteNotification() {
         guard !isDNDEnabled else { return }
 
+        // 播放大休息结束声音（西藏钵）
+        AudioPlayer.shared.playLongBreakSound()
+
         let content = UNMutableNotificationContent()
         content.title = "休息结束"
         content.body = "准备好开始新的专注周期了吗？"
-        content.sound = UNNotificationSound(named: UNNotificationSoundName("gentle.mp3"))
+        content.sound = .default
         content.categoryIdentifier = "breakCompleteNotification"
 
         sendNotification(content: content, identifier: "breakComplete")

@@ -39,6 +39,8 @@ class TimerController: ObservableObject {
     // MARK: - Initialization
     private init() {
         self.stateManager = StateManager.shared
+        self.notificationService = NotificationManager.shared
+        print("✅ TimerController initialized with NotificationManager")
     }
 
     // MARK: - Timer Control Methods
@@ -190,12 +192,20 @@ class TimerController: ObservableObject {
         // 随机2-5分钟（120-300秒）- 契约BR002
         let randomInterval = Int.random(in: 120...300)
         nextMicroBreakTime = elapsedTime + randomInterval
+        print("⏰ Next micro break scheduled at: \(nextMicroBreakTime) seconds (in \(randomInterval) seconds)")
     }
 
     /// 触发微休息
     private func triggerMicroBreak() {
+        print("🔔 Micro break triggered at elapsed time: \(elapsedTime)")
+
         guard currentPhase == .focusing,
-              stateManager?.currentCycle?.status == .active else { return }
+              stateManager?.currentCycle?.status == .active else {
+            print("❌ Micro break blocked - phase: \(currentPhase), cycle status: \(stateManager?.currentCycle?.status.rawValue ?? "nil")")
+            return
+        }
+
+        print("✅ Starting micro break...")
 
         // 记录微休息
         _ = stateManager?.recordMicroBreak()
@@ -208,6 +218,7 @@ class TimerController: ObservableObject {
         microBreakCountdown = 10  // 固定10秒 - 契约BR003
 
         // 发送通知
+        print("🔊 Calling sendMicroBreakNotification...")
         notificationService?.sendMicroBreakNotification()
 
         // 启动微休息计时器

@@ -97,6 +97,21 @@ struct CompactSettingsView: View {
                                     }
                                 }
                                 .labelsHidden()
+                                .onChange(of: settings.soundSettings.soundType) { newValue in
+                                    print("🔄 Sound type changed to: \(newValue.displayName) (\(newValue.fileName))")
+                                    settings.save()
+                                }
+
+                                Spacer()
+
+                                // 播放试听按钮
+                                Button(action: {
+                                    AudioPlayer.shared.playMicroBreakSound()
+                                }) {
+                                    Image(systemName: "play.circle.fill")
+                                        .font(.title3)
+                                }
+                                .buttonStyle(PlainButtonStyle())
                             }
 
                             HStack {
